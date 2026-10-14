@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>B2B Dashboard</title>
+
+<style>
+body { font-family: Arial; margin:0; background:#e9ecef; }
+
+/* ===== LOGIN ===== */
+.login-container {
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.login-card {
+  width:320px;
+  padding:30px;
+  background:white;
+  border-radius:10px;
+  box-shadow:0 6px 25px rgba(0,0,0,0.2);
+}
+
+.login-header {
+  text-align:center;
+  margin-bottom:20px;
+}
+
+.login-header h3 { margin:0; }
+.login-header p { font-size:12px; color:#666; }
+
+.form-group { margin-bottom:12px; }
+.form-group input {
+  width:100%;
+  padding:8px;
+  border-radius:5px;
+  border:1px solid #ccc;
+}
+
+.btn-login {
+  width:120px;
+  margin:10px auto 0;
+  display:block;
+  padding:8px;
+  background:#005CA9;
+  color:white;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.error {
+  text-align:center;
+  color:red;
+  font-size:12px;
+  display:none;
+}
+
+/* HEADER */
+.header {
+  background:#005CA9;
+  color:white;
+  padding:10px;
+  display:flex;
+  justify-content:space-between;
+}
+
+.btn-logout {
+  background:white;
+  color:#005CA9;
+  border:none;
+  padding:5px 10px;
+  border-radius:5px;
+}
+
+/* CARDS */
+.cards {
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  padding:12px;
+}
+
+.card {
+  width:260px;
+  padding:12px;
+  border-radius:10px;
+  cursor:pointer;
+  transition:.25s;
+}
+
+.card:hover { transform:scale(1.05); }
+
+.selected { border:3px solid black; }
+
+.ready { background:#e6f7ec; }
+.other { background:#fdecea; }
+
+.card-title { font-size:16px; font-weight:bold; }
+.card-small { font-size:11px; }
+
+.alert-high { color:#e74c3c; font-weight:bold; }
+.alert-medium { color:#f1c40f; font-weight:bold; }
+
+/* TABS */
+.tabs { display:flex; gap:10px; padding:10px; }
+
+.tab {
+  padding:6px 10px;
+  background:#ddd;
+  cursor:pointer;
+}
+
+.tab.active { background:#005CA9; color:white; }
+
+/* FILTER */
+.btn-filter {
+  padding:5px;
+  margin:3px;
+  background:#bdc3c7;
+}
+
+.active-filter {
+  background:#3498db;
+  color:white;
+}
+
+/* TABLE */
+table { width:100%; border-collapse:collapse; }
+
+th,td {
+  padding:6px;
+  border:1px solid #ddd;
+  font-size:12px;
+}
+
+th { background:#34495e; color:white; }
+
+/* STATUS */
+.dot {
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  display:inline-block;
+}
+
+.green { background:#2ecc71; }
+.red { background:#e74c3c; }
+
+/* PAGINAÇO */
+.pagination {
+  text-align:center;
+  margin:10px;
+}
+
+/* FOOTER */
+.footer {
+  position:fixed;
+  bottom:0;
+  width:100%;
+  background:#2c3e50;
+  color:white;
+  text-align:center;
+  padding:6px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="loginPage" class="login-container">
+  <div class="login-card">
+
+    <div class="login-header">
+      <h3>host</h3>
+      <p>IBM Sterling Control Center</p>
+    </div>
+
+    <div class="form-group">
+      <label>Login</label>
+      <input id="user">
+    </div>
+
+    <div class="form-group">
+      <label>Senha</label>
+      <input id="password" type="password">
+    </div>
+
+    <div id="loginError" class="error">
+      Usuáo ou senha invádos
+    </div>
+
+    <button class="btn-login" onclick="login()">Entrar</button>
+
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+
+<div class="header">
+<div>B2B Dashboard</div>
+<div>
+Usuáo: <b id="userName"></b>
+<button class="btn-logout" onclick="logout()">Sair</button>
+</div>
+</div>
+
+<div class="cards" id="cards"></div>
+
+<div class="tabs">
+<div class="tab active" onclick="openTab('adapters',this)">Adapters</div>
+<div class="tab" onclick="openTab('files',this)">Arquivos</div>
+</div>
+
+<!-- ADAPTERS -->
+<div id="adaptersTab">
+
+<input id="search" placeholder="Buscar..." onkeyup="renderAdapters()">
+
+<div>
+<button class="btn-filter active-filter" onclick="setFilter('ALL',this)">Todos</button>
+<button class="btn-filter" onclick="setFilter('ACTIVE',this)">Ativos</button>
+<button class="btn-filter" onclick="setFilter('DOWN',this)">Inativos</button>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Display</th>
+<th>Name</th>
+<th>Tipo</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody id="adaptersTable"></tbody>
+</table>
+</div>
+
+<!-- FILES -->
+<div id="filesTab" style="display:none">
+
+<input id="fileFilter" placeholder="Digite 4+ caracteres">
+
+<div id="filesTotal" style="margin:10px;font-weight:bold"></div>
+
+<table>
+<thead>
+<tr>
+<th>Arquivo</th>
+<th>ProcName</th>
+<th>Tamanho</th>
+<th>Status</th>
+<th>Data</th>
+</tr>
+</thead>
+<tbody id="filesTable"></tbody>
+</table>
+
+<div class="pagination">
+<div id="pageInfo"></div>
+<button onclick="prevPage()">Anterior</button>
+<button onclick="nextPage()">Próo</button>
+</div>
+
+</div>
+
+<div class="footer">IBM Sterling Control Center</div>
+</div>
+
+<script>
+
+const baseUrl = window.location.origin;
+
+let token="";
+let serverAtual="";
+let selectedCard=null;
+let adapters=[];
+let filter="ALL";
+
+let filePage=1;
+let totalRows=0;
+let limit=10;
+
+/* LOGIN */
+async function login(){
+
+  let res = await fetch(`${baseUrl}/api/auth/login`,{
+    method:"POST",
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      userId:user.value,
+      password:password.value
+    })
+  });
+
+  let data = await res.json();
+
+  if(!data.data){
+    loginError.style.display="block";
+    return;
+  }
+
+  token=data.data.bearerString;
+  userName.innerText=data.data.userName;
+
+  loginPage.style.display="none";
+  app.style.display="block";
+
+  loadServers();
+}
+
+/* SERVERS */
+async function loadServers(){
+
+  let res = await fetch(`${baseUrl}/api/v1/server/servers/search`,{
+    method:"POST",
+    headers:{
+      'Content-Type':'application/json',
+      'CC_Authorization':token
+    },
+    body:JSON.stringify({
+      limit:10,
+      showAllColumns:true
+    })
+  });
+
+  let data = await res.json();
+
+  cards.innerHTML="";
+
+  data.data.forEach(s=>{
+
+    let card=document.createElement("div");
+    card.className="card "+(s.statusCode==="READY"?"ready":"other");
+
+    card.innerHTML=`
+      <div class="card-title">${s.name}</div>
+      <div class="card-small">${s.hostName}</div>
+      <div class="card-small">${s.lastCheckin||''}</div>
+
+      <div>
+        <span class="alert-high"> ${s.highAlerts||0}</span>
+        <span class="alert-medium"> ${s.mediumAlerts||0}</span>
+      </div>
+
+      <div class="card-small">${s.serverOs||''}</div>
+      <div class="card-small">${s.nodeTypeCode||''}</div>
+    `;
+
+    card.onclick=()=>{
+
+      if(selectedCard) selectedCard.classList.remove("selected");
+
+      card.classList.add("selected");
+      selectedCard=card;
+
+      serverAtual=s.name;
+
+      loadAdapters();
+    };
+
+    cards.appendChild(card);
+  });
+}
+
+/* ADAPTERS */
+async function loadAdapters(){
+
+  let res = await fetch(`${baseUrl}/api/v1/server/servers/${serverAtual}/adapters`,{
+    headers:{'CC_Authorization':token}
+  });
+
+  let data = await res.json();
+  adapters=data.data;
+
+  renderAdapters();
+}
+
+function renderAdapters(){
+  let filtro=search.value.toLowerCase();
+  adaptersTable.innerHTML="";
+
+  adapters.forEach(a=>{
+    if(filter!=="ALL" && a.state!==filter) return;
+    if(!a.displayName.toLowerCase().includes(filtro)) return;
+
+    adaptersTable.innerHTML+=`
+    <tr>
+    <td>${a.displayName}</td>
+    <td>${a.name}</td>
+    <td>${a.subtype}</td>
+    <td><span class="dot ${a.state==="ACTIVE"?"green":"red"}"></span></td>
+    </tr>`;
+  });
+}
+
+/* FILES */
+fileFilter.addEventListener("keyup", ()=>{
+  if(fileFilter.value.length>=4){
+    filePage=1;
+    loadFiles();
+  }
+});
+
+async function loadFiles(){
+
+  let filtro=fileFilter.value;
+
+  let res = await fetch(
+    `${baseUrl}/api/v1/fileTransfers?serverName=${serverAtual}&localFileName=${filtro}&limit=${limit}&startIndex=${filePage}&sortColumn=started&sortOrder=desc`,
+    { headers:{'CC_Authorization':token} }
+  );
+
+  let data=await res.json();
+
+  totalRows=parseInt(data.totalRows || 0);
+  filesTotal.innerText=`Total: ${totalRows} registros`;
+
+  filesTable.innerHTML="";
+
+  data.data.forEach(f=>{
+    filesTable.innerHTML+=`
+    <tr>
+      <td>${f.localFileName||f.remoteFileName}</td>
+      <td>${f.process?.procName||''}</td>
+      <td>${f.fileSize}</td>
+      <td><span class="dot ${f.transferStatus==="success"?"green":"red"}"></span></td>
+      <td>${f.started}</td>
+    </tr>`;
+  });
+
+  updatePagination();
+}
+
+function updatePagination(){
+  let totalPages=Math.ceil(totalRows / limit);
+  pageInfo.innerText=`Pána ${filePage} de ${totalPages}`;
+}
+
+function nextPage(){
+  let totalPages=Math.ceil(totalRows / limit);
+  if(filePage < totalPages){
+    filePage++;
+    loadFiles();
+  }
+}
+
+function prevPage(){
+  if(filePage > 1){
+    filePage--;
+    loadFiles();
+  }
+}
+
+/* FILTER */
+function setFilter(f,btn){
+  filter=f;
+  document.querySelectorAll(".btn-filter").forEach(b=>b.classList.remove("active-filter"));
+  btn.classList.add("active-filter");
+  renderAdapters();
+}
+
+/* TABS */
+function openTab(tab,el){
+
+  adaptersTable.innerHTML="";
+  filesTable.innerHTML="";
+
+  document.getElementById("adaptersTab").style.display="none";
+  document.getElementById("filesTab").style.display="none";
+
+  document.getElementById(tab+"Tab").style.display="block";
+
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  el.classList.add("active");
+}
+
+/* LOGOUT */
+function logout(){ location.reload(); }
+
+</script>
+
+</body>
+</html>
+

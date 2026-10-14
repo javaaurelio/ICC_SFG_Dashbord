@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upload de Arquivo - SFG</title>
+
+<style>
+*{ box-sizing: border-box; }
+
+body{
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #e8f0fe 0%, #f4f6f9 100%);
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Header ─────────────────────────────────── */
+header{
+    background: linear-gradient(90deg, #003f7a 0%, #005CA9 100%);
+    color: white;
+    padding: 22px 40px 16px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(0,0,0,.25);
+}
+
+header h1{
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+header p{
+    margin: 6px 0 0;
+    font-size: 0.9rem;
+    opacity: 0.88;
+}
+
+/* ── Page content ────────────────────────────── */
+main{
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 44px 20px 32px;
+}
+
+/* ── Card ────────────────────────────────────── */
+.card{
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 4px 18px rgba(0,92,169,.13);
+    border-top: 4px solid #005CA9;
+    padding: 36px 40px 32px;
+    width: 100%;
+    max-width: 500px;
+}
+
+.card h2{
+    margin: 0 0 28px;
+    color: #005CA9;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-bottom: 1px solid #e4eaf5;
+    padding-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ── Divisor de seção ────────────────────────── */
+.section-label{
+    font-size: 11px;
+    font-weight: 700;
+    color: #005CA9;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 24px 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-label::after{
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e4eaf5;
+}
+
+/* ── Campos ──────────────────────────────────── */
+.campo{
+    margin-bottom: 18px;
+}
+
+.campo label{
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #374151;
+}
+
+.campo input[type="text"],
+.campo input[type="password"]{
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #c8d4e8;
+    border-radius: 6px;
+    font-size: 13px;
+    background: #fafcff;
+    transition: border-color .2s, box-shadow .2s;
+}
+
+.campo input[type="text"]:focus,
+.campo input[type="password"]:focus{
+    outline: none;
+    border-color: #005CA9;
+    box-shadow: 0 0 0 3px rgba(0,92,169,.12);
+    background: #fff;
+}
+
+/* ── Área de Drop de arquivo ─────────────────── */
+.drop-area{
+    border: 2px dashed #c8d4e8;
+    border-radius: 10px;
+    background: #f4f8ff;
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    position: relative;
+}
+
+.drop-area:hover,
+.drop-area.drag-over{
+    border-color: #005CA9;
+    background: #eaf1ff;
+}
+
+.drop-area input[type="file"]{
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+}
+
+.drop-icon{ font-size: 36px; line-height: 1; margin-bottom: 10px; }
+
+.drop-text{
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.drop-hint{
+    font-size: 12px;
+    color: #888;
+    margin-top: 4px;
+}
+
+/* ── Preview do arquivo selecionado ──────────── */
+#file-preview{
+    display: none;
+    align-items: center;
+    gap: 12px;
+    background: #f0f7ff;
+    border: 1px solid #c8deff;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-top: 12px;
+    font-size: 13px;
+}
+
+#file-preview.show{ display: flex; }
+
+#file-icon{ font-size: 24px; }
+
+#file-info{ flex: 1; min-width: 0; }
+
+#file-name{
+    font-weight: 700;
+    color: #005CA9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#file-size{ color: #666; font-size: 11px; margin-top: 2px; }
+
+#btn-remove-file{
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: #888;
+    padding: 0 4px;
+    transition: color .15s;
+    margin-left: 0;
+}
+
+#btn-remove-file:hover{ color: #dc2626; transform: none; }
+
+/* ── Barra de progresso ──────────────────────── */
+#progress-wrap{
+    display: none;
+    margin-top: 18px;
+}
+
+#progress-wrap.show{ display: block; }
+
+#progress-label{
+    font-size: 12px;
+    color: #555;
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+}
+
+#progress-bar-bg{
+    background: #e4eaf5;
+    border-radius: 20px;
+    height: 8px;
+    overflow: hidden;
+}
+
+#progress-bar{
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #005CA9, #22c55e);
+    border-radius: 20px;
+    transition: width .3s;
+}
+
+/* ── Botões ──────────────────────────────────── */
+.btn-row{
+    display: flex;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+button{
+    padding: 10px 22px;
+    border: none;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .18s, transform .1s;
+}
+
+#btn-upload{
+    flex: 1;
+    background: linear-gradient(135deg, #005CA9 0%, #003f7a 100%);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0,92,169,.3);
+}
+
+#btn-upload:hover{ transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,92,169,.38); }
+#btn-upload:disabled{ opacity: .55; cursor: not-allowed; transform: none; box-shadow: none; }
+
+#btn-limpar{
+    background: #f1f3f5;
+    color: #555;
+}
+
+#btn-limpar:hover{ background: #e2e5ea; transform: translateY(-1px); }
+
+.btn-voltar{
+    background: #64748b;
+    color: #fff;
+}
+
+.btn-voltar:hover{ background: #475569; transform: translateY(-1px); }
+
+/* ── Notification popup ──────────────────────── */
+#notif-overlay{
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.35);
+    z-index: 199998;
+    justify-content: center;
+    align-items: center;
+}
+
+#notif-overlay.show{ display: flex; }
+
+#notif-box{
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.22);
+    width: 360px;
+    max-width: 92vw;
+    overflow: hidden;
+    animation: notif-in .2s ease;
+}
+
+@keyframes notif-in{
+    from{ transform: scale(.85); opacity: 0; }
+    to  { transform: scale(1);   opacity: 1; }
+}
+
+#notif-header{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px 12px;
+    font-size: 15px;
+    font-weight: 700;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+#notif-icon{ font-size: 22px; line-height: 1; }
+
+#notif-body{
+    padding: 16px 20px;
+    font-size: 13.5px;
+    color: #374151;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+#notif-footer{ padding: 12px 20px 16px; text-align: right; }
+
+#notif-btn{
+    padding: 9px 28px;
+    border: none;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    color: #fff;
+    margin-left: 0;
+    transition: opacity .15s;
+}
+
+#notif-btn:hover{ opacity: .88; transform: none; }
+
+/* ── Footer ──────────────────────────────────── */
+footer{
+    text-align: center;
+    padding: 14px;
+    font-size: 12px;
+    color: #888;
+    border-top: 1px solid #dde3ec;
+    background: #f0f3f8;
+    letter-spacing: 0.4px;
+}
+
+footer span{ color: #005CA9; font-weight: 600; }
+</style>
+</head>
+
+<body>
+
+<!-- ── Notification modal ── -->
+<div id="notif-overlay" onclick="fecharNotificacao()">
+    <div id="notif-box" onclick="event.stopPropagation()">
+        <div id="notif-header">
+            <span id="notif-icon"></span>
+            <span id="notif-titulo"></span>
+        </div>
+        <div id="notif-body"></div>
+        <div id="notif-footer">
+            <button id="notif-btn" onclick="fecharNotificacao()">OK</button>
+        </div>
+    </div>
+</div>
+
+<header>
+    <h1>📤 Upload de Arquivo</h1>
+    <p>Envie arquivos para o IBM Sterling File Gateway</p>
+</header>
+
+<main>
+    <div class="card">
+
+        <h2>📁 Envio de Arquivo via REST API</h2>
+
+        <!-- ── Credenciais ── -->
+        <div class="section-label">Credenciais</div>
+
+        <div class="campo">
+            <label>Usuário</label>
+            <input type="text" id="usuario" placeholder="Ex: infrafacil" autocomplete="username">
+        </div>
+
+		<div id="mailbox-info"
+			 style="margin-top:-10px;margin-bottom:15px;font-size:12px;color:#005CA9;font-weight:bold;">
+		</div>
+
+        <div class="campo">
+            <label>Senha</label>
+            <input type="password" id="senha" placeholder="••••••••" autocomplete="current-password">
+        </div>
+
+        <!-- ── Arquivo ── -->
+        <div class="section-label">Arquivo</div>
+
+        <div class="drop-area" id="drop-area">
+            <input type="file" id="arquivo" onchange="onFileSelected(this.files[0])">
+            <div class="drop-icon">📂</div>
+            <div class="drop-text">Clique ou arraste o arquivo aqui</div>
+            <div class="drop-hint">Qualquer tipo de arquivo • Máx. 100 MB</div>
+        </div>
+
+        <div id="file-preview">
+            <span id="file-icon">📄</span>
+            <div id="file-info">
+                <div id="file-name"></div>
+                <div id="file-size"></div>
+            </div>
+            <button id="btn-remove-file" title="Remover arquivo" onclick="removerArquivo()">✕</button>
+        </div>
+
+        <!-- ── Barra de progresso ── -->
+        <div id="progress-wrap">
+            <div id="progress-label">
+                <span id="progress-status">Enviando...</span>
+                <span id="progress-pct">0%</span>
+            </div>
+            <div id="progress-bar-bg">
+                <div id="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- ── Botões ── -->
+        <div class="btn-row">
+            <button id="btn-upload" onclick="enviarArquivo()">⬆️ Enviar Arquivo</button>            
+            <button id="btn-limpar" onclick="limparFormulario()">🗑️ Limpar</button>
+            <button class="btn-voltar" onclick="window.location.href='index.html'">← Voltar</button>
+        </div>
+
+    </div>
+</main>
+
+<footer>
+    Powered by <span>IBM BOB</span>
+</footer>
+
+<script>
+
+
+document
+    .getElementById("usuario")
+    .addEventListener("blur", carregarMailbox);
+
+// ── Drag & Drop ──────────────────────────────────────────────
+const dropArea = document.getElementById("drop-area");
+
+dropArea.addEventListener("dragover", e => {
+    e.preventDefault();
+    dropArea.classList.add("drag-over");
+});
+
+dropArea.addEventListener("dragleave", () => {
+    dropArea.classList.remove("drag-over");
+});
+
+dropArea.addEventListener("drop", e => {
+    e.preventDefault();
+    dropArea.classList.remove("drag-over");
+    const file = e.dataTransfer.files[0];
+    if (file) {
+        document.getElementById("arquivo").files; // referência
+        onFileSelected(file);
+        // atribuir ao input via DataTransfer
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        document.getElementById("arquivo").files = dt.files;
+    }
+});
+
+// ── Seleção de arquivo ───────────────────────────────────────
+function onFileSelected(file) {
+    if (!file) return;
+
+    const icones = {
+        "application/pdf"  : "📕",
+        "application/zip"  : "🗜️",
+        "text/plain"       : "📝",
+        "text/csv"         : "📊",
+        "application/json" : "📋",
+        "image/png"        : "🖼️",
+        "image/jpeg"       : "🖼️",
+    };
+
+    const icon = icones[file.type] || "📄";
+    document.getElementById("file-icon").textContent = icon;
+    document.getElementById("file-name").textContent = file.name;
+    document.getElementById("file-size").textContent = formatarTamanho(file.size);
+    document.getElementById("file-preview").classList.add("show");
+    document.getElementById("progress-wrap").classList.remove("show");
+    setProgresso(0, "Aguardando envio...");
+}
+
+function removerArquivo() {
+    document.getElementById("arquivo").value = "";
+    document.getElementById("file-preview").classList.remove("show");
+    document.getElementById("progress-wrap").classList.remove("show");
+}
+
+function formatarTamanho(bytes) {
+    if (bytes < 1024)        return bytes + " B";
+    if (bytes < 1048576)     return (bytes / 1024).toFixed(1) + " KB";
+    return (bytes / 1048576).toFixed(2) + " MB";
+}
+
+// ── Progresso ────────────────────────────────────────────────
+function setProgresso(pct, status) {
+    document.getElementById("progress-bar").style.width = pct + "%";
+    document.getElementById("progress-pct").textContent = pct + "%";
+    document.getElementById("progress-status").textContent = status;
+}
+
+
+let mailboxName = "";
+// ── Envio ────────────────────────────────────────────────────
+async function enviarArquivo() {
+
+    const usuario = document.getElementById("usuario").value.trim();
+    const senha = document.getElementById("senha").value;
+    const arquivo = document.getElementById("arquivo").files[0];
+
+    if (!usuario) {
+        mostrarNotificacao("aviso", "Informe o usuário.");
+        return;
+    }
+
+    if (!senha) {
+        mostrarNotificacao("aviso", "Informe a senha.");
+        return;
+    }
+
+    if (!arquivo) {
+        mostrarNotificacao("aviso", "Selecione um arquivo.");
+        return;
+    }
+
+    const btnUpload = document.getElementById("btn-upload");
+    btnUpload.disabled = true;
+
+    try {
+
+        document.getElementById("progress-wrap").classList.add("show");
+        setProgresso(10, "Preparando envio...");
+
+        const sessionId = crypto.randomUUID();
+        const qquuid = crypto.randomUUID();
+
+        const formData = new FormData();
+
+        formData.append("qqfile", "blob");
+        
+		formData.append(
+			"mailboxName",
+			mailboxName || `/${usuario}/Inbox`
+		);
+//        formData.append("mailboxName", `/${usuario}/Inbox`);
+        formData.append("globalmailboxuser", "false");
+        formData.append("userId", usuario);
+        formData.append("sessionId", sessionId);
+        formData.append("qqpartindex", "0");
+        formData.append("qqpartbyteoffset", "0");
+        formData.append("qqchunksize", arquivo.size);
+        formData.append("qqtotalparts", "1");
+        formData.append("qqtotalfilesize", arquivo.size);
+        formData.append("qqfilename", arquivo.name);
+        formData.append("qquuid", qquuid);
+		formData.append("blob", arquivo, "blob");
+
+        const auth = btoa(`${usuario}:${senha}`);
+
+        setProgresso(40, "Enviando arquivo...");
+
+        const response = await fetch(
+            `https://fgw.des.cluster1.node1.host:5076/sfgapis/document/uploadfile/${usuario}`,
+            {
+                method: "POST",
+                headers: {
+                    Authorization: `Basic ${auth}`
+                },
+                body: formData
+            }
+        );
+
+        const texto = await response.text();
+
+        if (!response.ok) {
+            throw new Error(texto);
+        }
+
+        setProgresso(80, "Confirmando upload...");
+
+        const responseSuccess = await fetch(
+            `https://fgw.des.cluster1.node1.host:5076/sfgapis/document/uploadsuccess` +
+            `?qquuid=${encodeURIComponent(qquuid)}` +
+            `&qqfilename=${encodeURIComponent(arquivo.name)}` +
+            `&mailboxName=${encodeURIComponent(mailboxName || `/${usuario}/Inbox`)}` +
+            `&globalmailboxuser=false` +
+            `&userId=${encodeURIComponent(usuario)}` +
+            `&sessionId=${encodeURIComponent(sessionId)}`,
+            {
+                method: "POST",
+                headers: {
+                    Authorization: `Basic ${auth}`,
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: ""
+            }
+        );
+
+        if (!responseSuccess.ok) {
+            throw new Error(
+                `Falha no uploadsuccess (${responseSuccess.status})`
+            );
+        }
+
+        setProgresso(100, "Concluído");
+
+        mostrarNotificacao(
+            "sucesso",
+            `Arquivo enviado com sucesso.\n\n` +
+            `SessionId: ${sessionId}\n` +
+            `QQUUID: ${qquuid}`
+        );
+
+    } catch (e) {
+
+        setProgresso(0, "Falha no envio");
+
+        mostrarNotificacao(
+            "erro",
+            e.message
+        );
+
+    } finally {
+        btnUpload.disabled = false;
+    }
+}
+
+
+// ── Limpar ───────────────────────────────────────────────────
+function limparFormulario() {
+    document.getElementById("usuario").value = "";
+    document.getElementById("senha").value = "";
+    removerArquivo();
+}
+
+// ── Notificação ──────────────────────────────────────────────
+function mostrarNotificacao(tipo, mensagem) {
+    const cfg = {
+        sucesso: { icon: "✅", titulo: "Sucesso",    cor: "#16a34a" },
+        erro:    { icon: "❌", titulo: "Erro",       cor: "#dc2626" },
+        aviso:   { icon: "⚠️", titulo: "Atenção",   cor: "#d97706" },
+        info:    { icon: "ℹ️", titulo: "Informação", cor: "#005CA9" },
+    };
+    const c = cfg[tipo] || cfg.info;
+    document.getElementById("notif-icon").textContent   = c.icon;
+    document.getElementById("notif-titulo").textContent = c.titulo;
+    document.getElementById("notif-titulo").style.color = c.cor;
+    document.getElementById("notif-body").textContent   = mensagem;
+    document.getElementById("notif-header").style.borderBottomColor = c.cor + "33";
+    document.getElementById("notif-btn").style.background = c.cor;
+    document.getElementById("notif-overlay").classList.add("show");
+}
+
+function fecharNotificacao() {
+    document.getElementById("notif-overlay").classList.remove("show");
+}
+
+
+async function obterProducerMailboxPath(producer) {
+    const url =
+        "https://fgw.des.cluster1.node1.host:5076/B2BAPIs/svc/routingchannels/" +
+        "?_range=0-999" +
+        "&searchByConsumer="+
+        "&searchByTemplate="+
+        "&searchByProducer=" + producer;
+
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": "Basic " +
+                btoa("infrafacil:123456")
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error(`Erro HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!data || data.length === 0) {
+        return null;
+    }
+    return data[0].producerMailboxPath;
+}
+
+async function carregarMailbox() {
+
+    const usuario = document
+        .getElementById("usuario")
+        .value
+        .trim();
+
+    if (!usuario) {
+        document.getElementById("mailbox-info").innerHTML = "";
+        return;
+    }
+
+    try {
+
+        document.getElementById("mailbox-info").innerHTML =
+            "Consultando mailbox...";
+
+        const mailbox =
+            await obterProducerMailboxPath(usuario);
+			
+		mailboxName = mailbox;
+
+        document.getElementById("mailbox-info").innerHTML =
+            mailbox
+                ? `Mailbox: ${mailbox}`
+                : "Mailbox não encontrado";
+
+    } catch (e) {
+
+        document.getElementById("mailbox-info").innerHTML =
+            `Erro: ${e.message}`;
+    }
+}
+
+</script>
+</body>
+</html>

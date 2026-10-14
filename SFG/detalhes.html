@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consulta Integração</title>
+
+<style>
+*{box-sizing:border-box;}
+
+body{
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #e8f0fe 0%, #f4f6f9 100%);
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+header{
+    background: linear-gradient(90deg, #003f7a 0%, #005CA9 100%);
+    color: white;
+    padding: 22px 40px 14px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(0,0,0,.2);
+}
+
+header h1{
+    margin: 0;
+    font-size: 1.7rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+main{
+    flex: 1;
+    padding: 30px 30px 20px;
+    max-width: 960px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.card{
+    background: white;
+    padding: 28px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,92,169,.12);
+    border-top: 4px solid #005CA9;
+    margin-bottom: 24px;
+}
+
+.field-row{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+input{
+    width: 260px;
+    padding: 9px 12px;
+    border: 1px solid #c8d4e8;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color .2s;
+}
+
+input:focus{
+    outline: none;
+    border-color: #005CA9;
+    box-shadow: 0 0 0 3px rgba(0,92,169,.1);
+}
+
+button{
+    padding: 9px 20px;
+    background: #005CA9;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background .2s, transform .1s;
+}
+
+button:hover{
+    background: #004a8c;
+    transform: translateY(-1px);
+}
+
+table{
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+th{
+    background: #005CA9;
+    color: white;
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+th:first-child{ border-radius: 6px 0 0 0; }
+th:last-child{ border-radius: 0 6px 0 0; }
+
+td{
+    padding: 10px 14px;
+    border-bottom: 1px solid #e8edf5;
+}
+
+tr:nth-child(even){ background: #f4f7fc; }
+tr:hover{ background: #eaf0fb; }
+
+.tipo{
+    font-weight: 700;
+    color: #005CA9;
+}
+
+.loading-modal{
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,.45);
+    z-index: 99999;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-content{
+    background: white;
+    padding: 34px 48px;
+    border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.3);
+    text-align: center;
+}
+
+.spinner{
+    width: 52px;
+    height: 52px;
+    border: 5px solid #dde5f0;
+    border-top: 5px solid #005CA9;
+    border-radius: 50%;
+    animation: girar 1s linear infinite;
+    margin: auto;
+}
+
+.loading-text{
+    margin-top: 16px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #005CA9;
+}
+
+@keyframes girar{
+    from{ transform: rotate(0deg); }
+    to{ transform: rotate(360deg); }
+}
+
+footer{
+    text-align: center;
+    padding: 14px;
+    font-size: 12px;
+    color: #888;
+    border-top: 1px solid #dde3ec;
+    background: #f0f3f8;
+    letter-spacing: 0.4px;
+}
+
+footer span{
+    color: #005CA9;
+    font-weight: 600;
+}
+</style>
+</head>
+
+<body>
+<header>
+    <h1>🔍 Consultar Integração</h1>
+</header>
+<main>
+
+
+<div class="card">
+
+    <label>Codigo Integração </label><br>
+    <input id="codIntegracao" placeholder="Ex: RRYDI">
+    <button id="btnExecutar" onclick="consultar()">Consultar</button>
+	
+	<button
+		onclick="excluirIntegracao()"
+		style="
+			background:#dc3545;
+			color:white;
+			border:none;
+			padding:8px 15px;
+			border-radius:5px;
+			cursor:pointer;
+			margin-left:5px;
+		">
+		Excluir TUDO
+	</button>
+	
+	<button onclick="window.location.href='index.html'"
+        style="
+            background:#6c757d;
+            color:white;
+            border:none;
+            padding:8px 15px;
+            border-radius:5px;
+            cursor:pointer;">
+    ← Voltar
+</button>
+
+
+    <table>
+        <thead>
+            <tr>
+                <th>Tipo</th>
+                <th>Identificador</th>
+                <th>Descrição</th>
+            </tr>
+        </thead>
+        <tbody id="resultado"></tbody>
+    </table>
+	
+	
+
+</div>
+
+<div id="loadingModal" class="loading-modal">
+    <div class="loading-content">
+        <div class="spinner"></div>
+        <div class="loading-text">
+            Carregando informações...
+        </div>
+    </div>
+</div>
+
+<script>
+
+let recursos = {
+    tradingPartners: [],
+    canais: [],
+    schedules: [],
+    servicos: [],
+    idProdutor: null,
+    idConsumidor: null,
+    idworkflow: []
+};
+
+async function consultar(){
+    const botao = document.getElementById("btnExecutar");
+	
+	
+		Object.assign(recursos, {
+			tradingPartners: [],
+			canais: [],
+			schedules: [],
+			servicos: [],
+			idsworkflow: [],
+			idProdutor: null,
+			idworkflow: [],
+			idCA: []
+		});
+	
+	
+	
+	botao.disabled = true;
+    botao.textContent = "Carregando...";
+
+    const codigo = document
+        .getElementById("codIntegracao")
+        .value
+        .trim();
+
+		if (!codigo) {
+
+		alert("Informe o Código da Integração.");
+
+		return;
+
+		}
+    const tabela =
+        document.getElementById("resultado");
+
+    tabela.innerHTML = "";
+	
+	
+	try {
+
+		mostrarLoading("Consultando Integração...");
+
+
+    //
+    // API 1 - Trading Partners
+    //
+    const parceiros = await getApi(
+        `/B2BAPIs/svc/tradingpartners/?_range=0-999&searchFor=${codigo}`
+    );
+
+    let produtor = null;
+    let consumidor = null;
+
+
+		if (parceiros.notFound) {
+		 
+		tabela.innerHTML += `
+		<tr>
+		<td>Trading Partner</td>
+		<td colspan="2">Não encontrado</td>
+		</tr>`;
+		 
+		} else {
+		    parceiros.forEach(tp => {	
+			recursos.tradingPartners.push(tp._id);
+				tabela.innerHTML += `
+				<tr>
+					<td class="tipo">Trading Partner</td>
+					<td>${tp._id}</td>
+					<td>
+						${
+							tp.isInitiatingProducer?.code === true
+								? 'Produtor'
+								: `Consumidor - Protocolo: ${tp.customProtocolName || "Não informado"}`
+						}
+						
+					</td>
+				</tr>`;
+
+				if(tp.isInitiatingProducer?.code === true){
+					produtor = tp._id;
+				}else{
+					consumidor = tp._id;
+				}
+			});
+
+		}
+
+
+
+    //
+    // API 2 - Canal
+    //
+    if(produtor && consumidor){
+
+        const canalResponse = await getApi(
+            `/B2BAPIs/svc/routingchannels/?_range=0-999` +
+            `&searchByConsumer=${consumidor}` +
+            `&searchByTemplate=T_SIMPLE%25` +
+            `&searchByProducer=${produtor}`
+        );
+
+        canalResponse.forEach(canal => {
+		
+		recursos.canais.push(canal._id)
+
+            tabela.innerHTML += `
+            <tr>
+                <td class="tipo">Canal</td>
+                <td>${canal._id}</td>
+                <td>
+                   Template: ${canal.templateName}
+                    <br> 
+                    Produtor: ${canal.producer}
+                    <br>                     
+                    Consumidor: ${canal.consumer}
+					<br> 
+					Mailbox: ${canal.producerMailboxPath}
+                </td>
+            </tr>`;
+        });
+    } else{
+	
+		tabela.innerHTML += `
+		<tr>
+		<td>Canal</td>
+		<td colspan="2">Não encontrado</td>
+		</tr>`;
+	}
+
+    //
+    // API 3 - Schedules
+    //
+    const scheduleResponse = await getApi(
+        `/B2BAPIs/svc/schedules/?_range=0-20&searchFor=${codigo}`, 
+    );
+	
+	
+	if (scheduleResponse.notFound) {
+ 
+		tabela.innerHTML += `
+		<tr>
+		<td>Schedule</td>
+		<td colspan="2">Não encontrado</td>
+		</tr>`;
+		 
+		} else {
+	
+			scheduleResponse.forEach(schedule => {
+			
+			recursos.schedules.push(schedule._id);
+			
+			const parametros = (schedule.bpNameValuePairs || [])
+				.map(p => `
+					<tr>
+						<td style="
+							color:#005CA9;
+							font-weight:bold;
+							width:180px;
+							border:none;">
+							${p.name}
+						</td>
+						<td style="border:none;">
+							${p.val}
+						</td>
+					</tr>
+				`)
+				.join('');
+				
+			const agendamento =
+			`${schedule.timerSchedule?.hours || 0}h ${
+				schedule.timerSchedule?.minutes || 0
+			}min`;
+
+				tabela.innerHTML += `
+				<tr>
+					<td class="tipo">Schedule</td>
+					<td>${schedule._id}</td>
+					<td><b>Agendamento:</b>: ${agendamento}- ${schedule.excecutionDay} <br>  <b>Parâmetros:</b> <table style="margin-top:5px; font-size:11px;">
+					<tbody>
+					${parametros}
+					</tbody>
+					</table> </td>
+				</tr>`;
+			});
+		}
+
+    //
+    // API 4 - Serviços
+    //
+    const serviceResponse = await getApi(
+        `/B2BAPIs/svc/serviceinstances/?_range=0-20&serviceName=${codigo}&defName=`
+    );
+
+		
+		if (!serviceResponse || serviceResponse.length === 0) {
+		 
+				tabela.innerHTML += `
+				<tr>
+				<td>Servicos</td>
+				<td colspan="2">Não encontrado</td>
+				</tr>`;
+				 
+				} else {
+
+
+					serviceResponse.forEach(servico => {
+					
+					recursos.servicos.push(servico._id)
+
+						tabela.innerHTML += `
+						<tr>
+							<td class="tipo">Serviço(${servico.serviceName})</td>
+							<td>${servico._id}</td>            
+							<td>
+								${servico.defName || ''}
+							</td>
+						</tr>`;
+					});
+		}
+		
+	//
+    // API 5 - Bp
+    //
+    const workflowResponse = await getApi(
+        `https://fgw.des.cluster1.node1.host:5076/B2BAPIs/svc/workflows/?_range=0-10&fieldList=brief&searchFor=${codigo}`
+    );
+
+
+		if (!workflowResponse || workflowResponse.length === 0) {
+		 
+				tabela.innerHTML += `
+				<tr>
+				<td>Workflow</td>
+				<td colspan="2">Não encontrado</td>
+				</tr>`;
+				 
+				} else {
+
+
+
+					workflowResponse.forEach(bp => {
+					
+					recursos.idworkflow.push(bp._id);
+
+						tabela.innerHTML += `
+						<tr>
+							<td class="tipo">Workflow</td>
+							<td>${bp.wfdID}</td>            
+							<td>
+								${bp.name || ''}
+							</td>
+						</tr>`;
+					});
+		}
+		
+		
+		//
+    // API 6 - CA
+    //
+    const caResponse = await getApi(
+        `https://fgw.des.cluster1.node1.host:5076/B2BAPIs/svc/cadigitalcertificates/?_range=0-999&searchFor=${codigo}`
+    );
+
+
+		if (!caResponse || caResponse.notFound ) {
+		 
+				tabela.innerHTML += `
+				<tr>
+				<td>Certificado</td>
+				<td colspan="2">Não encontrado</td>
+				</tr>`;
+				 
+				} else {
+
+					caResponse.forEach(ca => {
+					
+					recursos.idCA.push(ca._id);
+
+						tabela.innerHTML += `
+						<tr>
+							<td class="tipo">Certificado</td>
+							<td>${ca._id}</td>            
+							<td>
+								${ca._title || ''}
+							</td>
+						</tr>`;
+					});
+		}
+
+	} catch (e) {
+		console.error(e);
+		
+		alert(e.message);	
+	} finally {
+	
+		botao.disabled = false;
+		
+		botao.textContent = "Executar";
+		
+		ocultarLoading();
+	
+	}
+}
+
+
+async function excluirIntegracao() {
+
+    if (!confirm("Deseja realmente excluir a integração?")) {
+        return;
+    }
+
+    try {
+	
+		mostrarLoading("Excluindo Integração...");
+	
+	     //
+        // Canais
+        //
+        for (const id of recursos.canais) {
+
+            console.log("Excluindo Canal:", id);
+
+            await deleteApi(
+                `https://fgw.des.cluster1.node1.host:5076/B2BAPIs/svc/routingchannels/${id}`
+            );
+        }
+	
+	    //
+        // Trading Partners
+        //
+        for (const id of recursos.tradingPartners) {
+
+            console.log("Excluindo Trading Partner:", id);
+
+            await deleteApi(
+                `https://fgw.des.cluster1.node1.host:5076/B2BAPIs/svc/tradingpartners/${id}`
+            );
+        }
+
+       //
+        // Serviços
+        //
+        for (const id of recursos.servicos) {
+
+            console.log("Excluindo Serviço:", id);
+
+            await deleteApi(
+                `https://fgw.des.cluster1.node1.host:5076/B2BAPIs/svc/serviceinstances/${id}`
+            );
+        }
+
+        //
+        // Schedules
+        //
+        for (const id of recursos.schedules) {
+
+            console.log("Excluindo Schedule:", id);
+
+            await deleteApi(
+                `https://fgw.des.cluster1.node1.host:5076/B2BAPIs/svc/schedules/${id}`
+            );
+        }
+		
+        //
+        // cadigitalcertificates
+        //
+		for (const id of recursos.idCA) {
+
+            console.log("Excluindo Certificado:", id);
+
+            await deleteApi(
+                `https://fgw.des.cluster1.node1.host:5076/B2BAPIs/svc/cadigitalcertificates/${id}`
+            );
+        }		
+		
+		for (const id of recursos.idworkflow) {
+
+            console.log("Excluindo BP:", id);
+
+            await deleteApi(
+                `https://fgw.des.cluster1.node1.host:5076/B2BAPIs/svc/workflows/${id}`
+            );
+        }
+		
+		
+        alert("Integração excluída com sucesso.");
+
+    } catch (e) {
+
+        console.error(e);
+
+        alert(
+            "Erro ao excluir integração.\n\n" +
+            e.message
+        );
+    } finally {
+	
+	
+		ocultarLoading();
+		
+	}
+}
+
+
+
+async function deleteApi(url) {
+
+    const response = await fetch(url, {
+        method: "DELETE",
+        headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization":
+                "Basic " + btoa("infrafacil:123456")
+        }
+    });
+
+    return response.ok;
+}
+
+async function getApi(url) {
+
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": "Basic " +
+                btoa("infrafacil:123456")
+        }
+    });
+	
+	if (response.status === 404) { 
+    
+		const erro = await response.json();
+
+		return {
+
+				notFound: true,
+
+				mensagem: erro.errorDescription
+
+				};
+
+	}
+
+    if (!response.ok) {
+	
+	    const erro = await response.json();
+        throw new Error(`HTTP ${response.status} - ${erro.errorDescription}`);
+    }
+
+    return await response.json();
+}
+
+function mostrarLoading(texto = "Carregando...") {
+
+    document.getElementById("loadingModal").style.display = "flex";
+
+    document.querySelector(".loading-text").innerText = texto;
+
+    document.body.style.cursor = "wait";
+}
+
+function ocultarLoading() {
+
+    document.getElementById("loadingModal").style.display = "none";
+
+    document.body.style.cursor = "default";
+}
+
+
+</script>
+
+
+
+</main>
+
+<footer>
+    Powered by <span>IBM BOB</span>
+</footer>
+
+</body>
+</html>

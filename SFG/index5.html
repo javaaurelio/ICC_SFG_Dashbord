@@ -1,0 +1,4182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Integração Produtor x Consumidor</title>
+
+<style>
+
+*{ box-sizing: border-box; }
+
+body{
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #e8f0fe 0%, #f4f6f9 100%);
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Header ─────────────────────────────────── */
+header{
+    background: linear-gradient(90deg, #003f7a 0%, #005CA9 100%);
+    color: white;
+    padding: 22px 40px 16px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(0,0,0,.25);
+}
+
+header h1{
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+header p{
+    margin: 6px 0 0;
+    font-size: 0.9rem;
+    opacity: 0.88;
+}
+
+/* ── Page wrapper ────────────────────────────── */
+.page-content{
+    flex: 1;
+    padding: 32px 24px 20px;
+}
+
+/* ── Layout ──────────────────────────────────── */
+.container{
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+/* ── Cards Produtor / Consumidor ─────────────── */
+.card{
+    width: 480px;
+    background: #fff;
+    padding: 28px 26px;
+    border-radius: 14px;
+    box-shadow: 0 4px 18px rgba(0,92,169,.13);
+    border-top: 4px solid #005CA9;
+    display: flex;
+    flex-direction: column;
+}
+
+.card h2{
+    margin: 0 0 16px;
+    color: #005CA9;
+    font-size: 1.15rem;
+    font-weight: 700;
+    border-bottom: 1px solid #e4eaf5;
+    padding-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ── Campos ──────────────────────────────────── */
+.campo{
+    margin-bottom: 18px;
+}
+
+.campo label{
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #374151;
+}
+
+.campo input,
+input[type="text"],
+input[type="number"]{
+    padding: 8px 11px;
+    border: 1px solid #c8d4e8;
+    border-radius: 6px;
+    font-size: 13px;
+    transition: border-color .2s, box-shadow .2s;
+    background: #fafcff;
+}
+
+.campo input:focus,
+input[type="text"]:focus,
+input[type="number"]:focus{
+    outline: none;
+    border-color: #005CA9;
+    box-shadow: 0 0 0 3px rgba(0,92,169,.12);
+    background: #fff;
+}
+
+.campo input{ width: 290px; }
+
+/* ── Botões ──────────────────────────────────── */
+button{
+    padding: 8px 16px;
+    margin-left: 6px;
+    border: none;
+    border-radius: 6px;
+    background: #005CA9;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .18s, transform .1s;
+}
+
+button:hover{ background: #004684; transform: translateY(-1px); }
+
+button:disabled{ opacity: .55; cursor: not-allowed; transform: none; }
+
+/* ── Resultado check ─────────────────────────── */
+.resultado{
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: 8px;
+}
+
+.ok{ color: #16a34a; font-weight: 700; }
+.erro{ color: #dc2626; font-weight: 700; }
+
+svg{ width: 22px; height: 22px; }
+
+/* ── Protocolo tabs ──────────────────────────── */
+.label-protocolo{
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.divisor-protocolo{
+    border-top: 1px solid #e4eaf5;
+    margin-bottom: 14px;
+}
+
+.tabs{
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+.tab{
+    background: #eef3fd;
+    color: #2456a6;
+    border: 1px solid #c7d9ff;
+    border-radius: 20px;
+    padding: 7px 18px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .2s, box-shadow .2s;
+}
+
+.tab:hover{ background: #dce9ff; }
+
+.tab.active{
+    background: #005CA9;
+    color: #fff;
+    border-color: #005CA9;
+    box-shadow: 0 2px 8px rgba(0,92,169,.25);
+}
+
+.tab-content{ display: none; }
+.tab-content.active{ display: block; }
+.tab-content-cons{ display: none; }
+.tab-content-cons.active{ display: block; }
+
+/* ── Schedule ────────────────────────────────── */
+.schedule{
+    margin-top: 20px;
+    padding-top: 14px;
+    border-top: 1px dashed #dde5f5;
+}
+
+.schedule label{
+    font-size: 12px;
+    color: #666;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.schedule-row{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.schedule-row span{
+    font-size: 12px;
+    color: #555;
+}
+
+/* ── Info boxes (Browser / SFTP) ─────────────── */
+.info-browser{
+    background: #f4f8ff;
+    border: 1px solid #d0e0ff;
+    border-radius: 10px;
+    padding: 14px 16px;
+    line-height: 1.65;
+    font-size: 13px;
+}
+
+.info-browser p{ margin: 8px 0; }
+
+.info-browser a{
+    color: #0b5cab;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.info-browser a:hover{ text-decoration: underline; }
+
+/* ── Tooltip ─────────────────────────────────── */
+.tooltip{ position: relative; }
+
+.tooltip-text{
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    bottom: 130%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e293b;
+    color: #fff;
+    padding: 7px 11px;
+    border-radius: 6px;
+    white-space: nowrap;
+    font-size: 11px;
+    transition: opacity .25s;
+    z-index: 999;
+}
+
+.tooltip:hover .tooltip-text{
+    visibility: visible;
+    opacity: 1;
+}
+
+/* ── CD blocks ───────────────────────────────── */
+.info-cd{ margin-top: 8px; font-size: 12.5px; }
+
+.cd-bloco{
+    margin-top: 16px;
+    padding: 14px;
+    border: 1px solid #dde5f0;
+    border-radius: 10px;
+    background: #f8faff;
+}
+
+.cd-bloco h4{
+    margin: 0 0 6px;
+    color: #0b5cab;
+    font-size: 13px;
+}
+
+.campo-cd{ margin-top: 10px; }
+
+.campo-cd label{
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: #555;
+    margin-bottom: 4px;
+}
+
+.campo-cd input{
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #c8d4e8;
+    border-radius: 5px;
+    font-size: 11px;
+    background: #fff;
+}
+
+/* ── Azure ───────────────────────────────────── */
+.info-azure{ font-size: 12.5px; }
+
+.campo-azure{ margin-top: 10px; }
+
+.campo-azure label{
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: #555;
+    margin-bottom: 4px;
+}
+
+.campo-azure input{
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #c8d4e8;
+    border-radius: 5px;
+    font-size: 11px;
+    background: #fff;
+}
+
+.dados-sfg{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+    font-size: 12px;
+    background: #f0f5ff;
+    border: 1px solid #ccdaff;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.input-curto{ width: 180px !important; }
+
+/* ── Central de Integração ───────────────────── */
+.integracao{
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+}
+
+.textoIntegracao{
+    font-size: 11px;
+    font-weight: 700;
+    color: #005CA9;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.linha{
+    width: 2px;
+    height: 50px;
+    background: linear-gradient(180deg, #005CA9, #22c55e);
+    border: none;
+}
+
+.seta{
+    font-size: 28px;
+    color: #22c55e;
+}
+
+.btn-integrar{
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s;
+    box-shadow: 0 4px 14px rgba(22,163,74,.35);
+    margin-top: 16px;
+    width: 100%;
+    letter-spacing: 0.3px;
+}
+
+.btn-integrar:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(22,163,74,.45);
+}
+
+.btn-voltar{
+    background: #64748b;
+    color: white;
+    border: none;
+    padding: 9px 20px;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 12px;
+    width: 100%;
+    transition: background .15s;
+}
+
+.btn-voltar:hover{ background: #475569; transform: none; }
+
+/* ── Checkboxes ──────────────────────────────── */
+.checkboxes label{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+}
+
+.checkboxes input[type="checkbox"]{
+    width: auto;
+    accent-color: #005CA9;
+}
+
+/* ── Loading modal ───────────────────────────── */
+.loading-modal{
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,.45);
+    z-index: 99999;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-content{
+    background: white;
+    padding: 34px 48px;
+    border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.3);
+    text-align: center;
+}
+
+.spinner{
+    width: 52px;
+    height: 52px;
+    border: 5px solid #dde5f0;
+    border-top: 5px solid #005CA9;
+    border-radius: 50%;
+    animation: girar 1s linear infinite;
+    margin: auto;
+}
+
+.loading-text{
+    margin-top: 16px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #005CA9;
+}
+
+@keyframes girar{
+    from{
+        transform:rotate(0deg);
+    }
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+.checkboxes{
+    display:flex;
+    align-items:center;
+    gap:20px;
+    margin-bottom:15px;
+}
+
+.checkboxes label{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    font-weight:bold;
+    margin:0;
+}
+
+.checkboxes input[type="checkbox"]{
+    width:auto;
+}
+
+footer{
+    text-align: center;
+    padding: 14px;
+    font-size: 12px;
+    color: #888;
+    border-top: 1px solid #dde3ec;
+    background: #f0f3f8;
+    letter-spacing: 0.4px;
+    margin-top: 40px;
+}
+
+footer span{
+    color: #005CA9;
+    font-weight: 600;
+}
+/* ── Notification popup ──────────────────────── */
+#notif-overlay{
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.35);
+    z-index: 199998;
+    justify-content: center;
+    align-items: center;
+}
+
+#notif-overlay.show{ display: flex; }
+
+#notif-box{
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.22);
+    width: 360px;
+    max-width: 92vw;
+    overflow: hidden;
+    animation: notif-in .2s ease;
+}
+
+@keyframes notif-in{
+    from{ transform: scale(.85); opacity: 0; }
+    to  { transform: scale(1);   opacity: 1; }
+}
+
+#notif-header{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px 12px;
+    font-size: 15px;
+    font-weight: 700;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+#notif-icon{ font-size: 22px; line-height: 1; }
+
+#notif-body{
+    padding: 16px 20px;
+    font-size: 13.5px;
+    color: #374151;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+#notif-footer{
+    padding: 12px 20px 16px;
+    text-align: right;
+}
+
+#notif-btn{
+    padding: 9px 28px;
+    border: none;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    color: #fff;
+    margin-left: 0;
+    transition: opacity .15s;
+}
+
+#notif-btn:hover{ opacity: .88; transform: none; }
+
+</style>
+</head>
+
+<body>
+
+<!-- ── Notification modal ── -->
+<div id="notif-overlay" onclick="fecharNotificacao()">
+    <div id="notif-box" onclick="event.stopPropagation()">
+        <div id="notif-header">
+            <span id="notif-icon"></span>
+            <span id="notif-titulo"></span>
+        </div>
+        <div id="notif-body"></div>
+        <div id="notif-footer">
+            <button id="notif-btn" onclick="fecharNotificacao()">OK</button>
+        </div>
+    </div>
+</div>
+
+<header>
+    <h1>⚙️ Fluxo de Integração</h1>
+    <p>Código da Integração: <span id="cdIntegracao" style="font-size:1.05rem;font-weight:700;"></span></p>
+</header>
+
+<div class="page-content">
+
+<div id="loadingModal" class="loading-modal">
+    <div class="loading-content">
+        <div class="spinner"></div>
+        <div class="loading-text">
+            Carregando informações...
+        </div>
+    </div>
+</div>
+
+
+<div class="container">
+
+    <!-- PRODUTOR -->
+    <div class="card">
+
+        <h2>📤 Produtor</h2>
+
+        <div class="campo">
+            <label>Nome Produtor</label>
+
+            <input
+				type="text"
+				id="produtor"
+				onkeyup="atualizarCredenciaisProdutor()">
+
+            <button onclick="validarProdutor()">
+                Check
+            </button>
+
+            <span id="resultadoProdutor" class="resultado"></span>
+        </div>
+
+        <div class="campo">
+            
+			
+			<label class="label-protocolo">Protocolo</label>
+			
+			<div class="divisor-protocolo"></div>
+
+					<div class="tabs">
+
+						<div id="btn-nfs"
+							 class="tab active"
+							 onclick="openTab('nfs')">
+							NFS
+						</div>
+
+						<div id="btn-browser"
+							 class="tab"
+							 onclick="openTab('browser')">
+							Browser
+						</div>
+
+						<div id="btn-sftp"
+							 class="tab"
+							 onclick="openTab('sftp')">
+							SFTP
+						</div>
+
+						<div id="btn-cd"
+							 class="tab tooltip"
+							 onclick="openTab('cd')">
+							CD
+							
+							<span class="tooltip-text">
+							IBM Connect:Direct
+							</span>
+						</div>
+
+
+						<div id="btn-azure"
+							 class="tab tooltip"
+							 onclick="openTab('azure')">
+							Azure							
+							<span class="tooltip-text">
+							Azure
+							</span>
+						</div>
+
+					</div>
+
+					<!-- NFS -->
+
+					<div id="nfs" class="tab-content active">
+
+							<div class="input-group">
+
+								<input
+									type="text"
+									id="origemNfs"
+									placeholder="/NFS/PARCEIROS/PB_SISTEMA_ORI_A">
+
+								<button
+									class="btn"
+									onclick="validarOrigem()">
+									Check
+								</button>
+
+								<span id="resultadoOrigem"></span>
+
+							</div>
+
+							<div class="schedule">
+
+								<label>Agendar a cada</label>
+
+								<div class="schedule-row">
+
+									<input
+										type="number"
+										id="agendamento"
+										value="5"
+										min="1"
+										style="width:90px;">
+
+									<span>Min</span>
+
+								</div>
+
+							</div>
+
+						</div>
+
+					<!-- Browser -->
+
+						<div id="browser" class="tab-content">
+
+							<div class="info-browser">
+
+								<p>
+									Você vai enviar o arquivo acessando o site:
+								</p>
+
+								<p>
+									<strong>URL:</strong><br>
+									<a href="https://webfgw.host.gov.br/myfg/login"
+									   target="_blank">
+										https://webfgw.host.gov.br/myfg/login
+									</a>
+								</p>
+
+								<p>
+									<strong>Login:</strong><br>
+									<span id="browserLogin">Informe o produtor</span>
+								</p>
+
+								<p>
+									<strong>Senha:</strong><br>
+									123456
+								</p>
+
+								<p>
+									<strong>Link de ajuda:</strong><br>
+									As orientações serão enviadas por e-mail.
+								</p>
+
+							</div>
+
+						</div>
+
+					<!-- SFTP -->
+
+					<div id="sftp" class="tab-content">
+
+							<div class="info-browser">
+
+								<p>
+									Você vai enviar o arquivo via SFTP utilizando os dados abaixo:
+								</p>
+
+								<p>
+									<strong>Host:</strong><br>
+									sftpfgw.host.gov.br
+								</p>
+
+								<p>
+									<strong>Porta:</strong><br>
+									22
+								</p>
+
+								<p>
+									<strong>Usuário:</strong><br>
+									<span id="sftpLogin">Informe o produtor</span>
+								</p>
+
+								<p>
+									<strong>Senha:</strong><br>
+									123456
+								</p>
+
+								<p>
+									<strong>Diretório Remoto:</strong><br>
+									/ENVIAR
+								</p>
+
+								<p>
+									<strong>Ajuda:</strong><br>
+									As orientações serão enviadas por e-mail.
+								</p>
+
+							</div>
+
+						</div>
+
+					<!-- CD -->
+
+					<div id="cd" class="tab-content">
+
+						<div class="info-cd">
+
+							<p>
+								<strong>Connect:Direct</strong>
+							</p>
+
+							<p>
+								Criar a integração para o nosso Connect:Direct receber a conexão e aceitar os arquivos.
+							</p>
+
+							<div class="cd-bloco">
+
+								<h4>PNODE - CD Emissor</h4>
+
+								<small>
+									Connect:Direct que vai enviar arquivos para o SFG.
+								</small>
+
+								<div class="campo-cd">
+									<label>Node Name *</label>
+									<input
+										type="text"
+										id="cdPnodeName"
+										class="input-curto" maxlength="50">
+								</div>
+
+								<div class="campo-cd">
+									<label>Host *</label>
+									<input
+										type="text"
+										id="cdPnodeHost"
+										class="input-curto" maxlength="100">
+								</div>
+
+								<div class="campo-cd">
+									<label>Port *</label>
+									<input
+										type="text"
+										id="cdPnodePort"
+										class="input-curto" style="width:80px;" maxlength="5" inputmode="numeric">
+										
+										
+										
+								</div>
+
+								<div class="campo-cd">
+									<label>
+										Max locally initiated (PNODE) sessions allowed
+									</label>
+
+									<input
+										type="text"
+										value="4"
+										id="cdMaxLocal" style="width:80px;" maxlength="2" inputmode="numeric">
+								</div>
+
+								<div class="campo-cd">
+									<label>
+										Max remotely initiated (SNODE) sessions allowed
+									</label>
+
+									<input
+										type="text"
+										value="4"
+										id="cdMaxRemote" style="width:80px;" maxlength="2" inputmode="numeric">
+								</div>
+
+								<div class="campo-cd">
+									<label>Alternate Comm Info</label>
+									<input
+										type="text"
+										id="cdAlternateComm">
+								</div>
+
+							</div>
+
+							<div class="cd-bloco">
+
+								<h4>SNODE - CD Gateway (SFG)</h4>
+
+								<p>
+									O CD Emissor (PNODE) vai enviar para:
+								</p>
+
+								<div class="dados-sfg">
+
+									<div>
+										<strong>Host:</strong><br>
+										FGWD_SIGDB.fgw.des.cluster1.host
+									</div>
+
+									<div>
+										<strong>Porta:</strong><br>
+										5412
+									</div>
+
+									<div>
+										<strong>Node Name (SNODE):</strong><br>
+										FGWD_SIGDB
+									</div>
+
+									<div>
+										<strong>DNS:</strong><br>
+										<span id="cdDns">
+											/&lt;NomeProdutor&gt;/CD/Envio
+										</span>
+									</div>
+
+								</div>
+
+							</div>
+
+						</div>
+
+					</div>
+					
+					<!-- Azure  -->
+					
+					<div id="azure" class="tab-content">
+
+					<div class="info-azure">
+
+					<div class="campo-azure">
+					<label>EndPoint URL</label>
+					<input
+						type="text"
+						id="prod-azureURL"
+						class="input-curto" maxlength="50">
+					</div>
+
+					<div class="campo-azure">
+						<label>Bucket Name *</label>
+						<input
+							type="text"
+							id="prod-azureBucket"
+							class="input-curto" maxlength="100">
+					</div>
+					
+					<div class="campo-azure">
+						<label>Secretkey</label>
+						<input
+						type="text"
+						id="prod-azureSecretKey">
+					</div>
+					
+					<div class="campo-azure">
+						<label>CA Certificate - CA</label>
+						<input
+						type="file"
+						id="prod-azureCACertificate"
+						accept=".cer,.crt">
+					</div>
+					
+					</br>
+					
+					<div class="campo-azure">
+						<label>Pasta Origem</label>
+						<input
+						type="text"
+						id="prod-azure-pastaorigem">
+						<span class="tooltip-text">
+							Serão coletados todos os arquivos do diretorio.
+						</span>
+					</div>
+					<div class="campo-azure">
+						<label>Pasta Arquivado</label>
+						<input
+						type="text"
+						id="prod-azure-pastaarquivado">
+						<span class="tooltip-text">
+							Pasta de arquivos já coletados.
+						</span>
+					</div>
+					
+					<div class="schedule-row campo-azure">
+
+						<input
+							type="number"
+							id="prod-azure-agendamento"
+							value="5"
+							min="1"
+							style="width:90px;">
+
+						<span>Min</span>
+
+					</div>
+
+				</div>
+
+			</div>
+			
+			
+        </div>
+
+
+    </div>
+
+    <!-- INTEGRAÇÃO -->
+
+    <div class="integracao">
+
+        <div class="textoIntegracao">
+            Integração
+        </div>
+
+        <div class="linha"></div>
+
+        <div class="seta">➜</div>
+
+        <button id="btnIntegrar"
+            class="btn-integrar"
+            onclick="criarIntegracao()">
+            ✅ Criar Integração
+        </button>
+
+        <button class="btn-voltar"
+            onclick="window.location.href='index.html'">
+            ← Voltar
+        </button>
+
+    </div>
+		
+
+    <!-- CONSUMIDOR -->
+
+    <div class="card">
+
+	<div class="campo">
+        <h2>📥 Consumidor</h2>
+
+		<div class="campo">
+			<label>Nome Consumidor</label>
+
+			<div class="input-group">
+
+				<input
+					type="text"
+					id="consumidor" onkeyup="atualizarCredenciaisConsumidor()">
+
+				<button
+					class="btn"
+					onclick="validarConsumidor()">
+					Check
+				</button>
+
+				<span id="resultadoConsumidor"></span>
+				
+			</div>			
+			
+		</div>
+		<div class="campo checkboxes">
+
+			<label>
+				<input type="checkbox" id="chkAtivoZIP">
+				ZIP
+			</label>
+
+		</div>
+
+		<div class="campo">
+		
+			<label class="label-protocolo">Protocolo</label>
+			
+			<div class="divisor-protocolo"></div>
+
+			<div class="tabs">
+
+				<div id="btn-cons-nfs"
+					 class="tab active"
+					 onclick="openConsumidorTab('cons-nfs')">
+					NFS
+				</div>
+
+				<div id="btn-cons-browser"
+					 class="tab"
+					 onclick="openConsumidorTab('cons-browser')">
+					Browser
+				</div>
+
+				<div id="btn-cons-sftp"
+					 class="tab"
+					 onclick="openConsumidorTab('cons-sftp')">
+					SFTP
+				</div>
+
+				<div id="btn-cons-cd"
+					 class="tab"
+					 onclick="openConsumidorTab('cons-cd')">
+					CD
+				</div>
+				
+				<div id="btn-cons-azure"
+					 class="tab"
+					 onclick="openConsumidorTab('cons-azure')">
+					Azure
+				</div>
+
+			</div>
+
+			<!-- NFS -->
+
+			<div id="cons-nfs" class="tab-content-cons active">
+
+				<div class="input-group">
+
+					<input
+						type="text"
+						id="destinoNfs"
+						placeholder="/NFS/PARCEIROS/DESTINO">
+
+					<button
+						class="btn"
+						onclick="validarDestino()">
+						Check
+					</button>
+
+					<span id="resultadoDestino"></span>
+
+				</div>
+
+			</div>
+
+			<!-- Browser -->
+
+			<div id="cons-browser"
+				 class="tab-content-cons">
+
+				<div class="input-group">
+
+							<div class="info-browser">
+
+								<p>
+									Seu cliente vai receber o arquivo acessando o site:
+								</p>
+
+								<p>
+									<strong>URL:</strong><br>
+									<a href="https://webfgw.host.gov.br/myfg/login"
+									   target="_blank">
+										https://webfgw.host.gov.br/myfg/login
+									</a>
+								</p>
+
+								<p>
+									<strong>Login:</strong><br>
+									<span id="browserLoginConsumidor">Informe o consumidor</span>
+								</p>
+
+								<p>
+									<strong>Senha:</strong><br>
+									123456
+								</p>
+
+								<p>
+									<strong>Link de ajuda:</strong><br>
+									As orientações serão enviadas por e-mail.
+								</p>
+
+							</div>
+
+				</div>
+
+			</div>
+
+			<!-- SFTP -->
+
+			<div id="cons-sftp"
+				 class="tab-content-cons">
+
+				<div class="input-group">
+
+					<input
+						type="text"
+						id="destinoSftp"
+						placeholder="sftp://host/diretorio">
+
+					<button
+						class="btn"
+						onclick="validarDestino()">
+						Check
+					</button>
+
+				</div>
+
+			</div>
+
+			<!-- CD -->
+
+			<div id="cons-cd"
+				 class="tab-content-cons">
+
+				<div class="input-group">
+
+					<input
+						type="text"
+						id="destinoCd"
+						placeholder="Servidor Connect Direct">
+
+					<button
+						class="btn"
+						onclick="validarDestino()">
+						Check
+					</button>
+
+				</div>
+
+			</div>
+			
+			<!-- Azure  -->
+
+			<div id="cons-azure"
+				 class="tab-content-cons">
+
+				<div class="input-group">
+
+					<div class="campo-azure">
+					<label>EndPoint URL</label>
+					<input
+						type="text"
+						id="azureURL"
+						class="input-curto" maxlength="50">
+					</div>
+
+					<div class="campo-azure">
+						<label>Bucket Name *</label>
+						<input
+							type="text"
+							id="azureBucket"
+							class="input-curto" maxlength="100">
+					</div>
+					
+					<div class="campo-azure">
+						<label>Pasta Destino</label>
+						<input
+							type="text"
+							id="azureBucketPasta"
+							class="input-curto" maxlength="100">
+					</div>
+					
+					<div class="campo-azure">
+						<label>Secretkey</label>
+						<input
+						type="text"
+						id="azureSecretKey">
+					</div>
+					
+					<div class="campo-azure">
+						<label>CA Certificate - CA</label>
+						<input
+						type="file"
+						id="azureCACertificate"
+						accept=".cer,.crt">
+					</div>
+									
+					
+
+				</div>
+
+			</div>
+		</div>
+
+    </div>
+	
+	
+
+</div>
+
+<script>
+
+const SVG_OK = `
+<svg viewBox="0 0 32 32">
+    <circle cx="16" cy="16" r="16" fill="#28a745"></circle>
+    <path d="M9 17 L14 22 L23 12"
+          stroke="white"
+          stroke-width="3"
+          fill="none">
+    </path>
+</svg>`;
+
+const SVG_ERRO = `
+<svg viewBox="0 0 32 32">
+    <circle cx="16" cy="16" r="16" fill="#dc3545"></circle>
+    <path d="M10 10 L22 22 M22 10 L10 22"
+          stroke="white"
+          stroke-width="3">
+    </path>
+</svg>`;
+
+
+function obterOrigemSelecionada() {
+
+    switch(tipoOrigem) {
+
+        case "NFS":
+            return document.getElementById("origemNfs").value;
+
+        case "BROWSER":
+            return document.getElementById("origemBrowser").value;
+
+        case "SFTP":
+            return document.getElementById("origemSftp").value;
+
+        case "CD":
+            return document.getElementById("origemCd").value;
+			
+		case "AZURE":
+            return document.getElementById("origemAzure").value;
+
+        default:
+            return "";
+    }
+}
+
+async function criarIntegracao() {    
+       
+		const botao = document.getElementById("btnIntegrar");		    	
+		const protocoloProdutor = tipoOrigem.toUpperCase();
+		const protocoloConsumidor = tipoDestino.toUpperCase();
+		const chave =
+			protocoloProdutor +
+			"_" +
+			protocoloConsumidor;
+			
+		console.log("Criado Integracao com parametros: " + protocoloProdutor +" - " + protocoloConsumidor);
+		
+		
+		try {
+		   mostrarLoading("Criando Integração...");
+		   //await new Promise(r => setTimeout(r, 5000));
+		   await criarIntegracaoGeral(protocoloProdutor, protocoloConsumidor);		   
+		} finally {
+		
+		   ocultarLoading();
+		
+		}
+
+
+     /*
+		switch(chave) {
+			case "NFS_NFS":
+				criarIntegracaoNfs("NFS", "NFS");
+				
+			case "NFS_BROWSER":
+				//criarIntegracaoNfsComBrowser();
+				  criarIntegracaoNfs("NFS", "BROWSER");
+				  break;
+				
+			case "NFS_AZURE":
+				//return criarIntegracaoNFSComAzure();	
+				criarIntegracaoNfs("NFS", "AZURE");
+				break;
+				
+			case "AZURE_NFS":
+				//criarIntegracaoAzureComNFS();	
+				break;
+
+			case "BROWSER_BROWSER":
+				criarIntegracaoNfs("BROWSER", "BROWSER");
+				break;
+				
+			case "BROWSER_NFS":
+				//criarIntegracaoBrowserComNFS();			
+				break;
+							
+			case "BROWSER_AZURE":
+				//criarIntegracaoBrowserComAzure();
+				criarIntegracaoNfs("BROWSER", "AZURE");
+				break;
+
+			case "SFTP_SFTP":
+				//criarIntegracaoSftp();
+				break;
+
+			case "CD_NFS":
+				//criarIntegracaoCdNfs();
+				break;
+
+			case "CD_BROWSER":
+				//criarIntegracaoCdBrowser();
+				break;
+
+			default:
+            throw new Error(
+                "Combinação não suportada: " +
+                chave
+            );
+		
+		}
+		
+		*/
+	
+}
+
+async function criarServicoAzure(nomeConsumidorParam, azureServiceGroupParam, azureHostParam, CANameParam, azureBucketParam) {
+	/*
+	
+	   PROXY
+	   PROXY
+	
+	*/
+
+	const azureHostTratado =
+        azureHostParam
+            .replace(/^https?:\/\//i, "")
+            .replace(/\/$/, "");
+
+    const payload = {
+
+        Status: true,
+
+        definitionName: "ObjectStoreClientAdapter",
+
+        description:
+            "Integracao com " +
+            azureHostTratado +
+            " via RestAPI",
+
+        instParms:
+            "'TimeOut':'30000'," +
+            "'ProxyBasicAuthentication':'false'," +
+            "'MaxThreads':'6'," +
+            "'CACertList.length':'1'," +
+            "'Endpoint':'" + azureHostParam + "'," +
+            "'Retries':'3'," +
+            "'ProxyHost':'proxydes.host'," +
+            "'ObjectStoreType':'azure'," +
+            "'CACertList.1':'" + CANameParam + "'," +
+            "'ReadTimeOut':'30000'," +
+            "'ProxyServer':'false'," +
+            "'MinThreads':'3'," +
+            "'sslMust':'true'," +
+            "'DocumentStorageType':'fs'," +
+            "'BucketName':'" + azureBucketParam + "', " +
+            "'ProxyPort':'80'",
+            serviceGroupName: azureServiceGroupParam,
+            serviceName: "CEF_Azure_" + azureHostTratado + "_" + nomeConsumidorParam,
+        targetEnv: null
+    };
+
+
+    return await postApi(
+        "/serviceinstances/",
+        payload
+    );
+}
+
+
+
+async function criarServicoAzureProdutor() {
+
+    const produtor =
+        document.getElementById("produtor")
+            .value.trim();
+    const cdIntegracao = document.getElementById("cdIntegracao").textContent.trim();
+
+    const azureURL =
+        document.getElementById("prod-azureURL")
+            .value.trim();
+
+    const azureHost =
+        azureURL
+            .replace(/^https?:\/\//i, "")
+            .replace(/\/$/, "");
+
+    const azureBucket = document.getElementById("prod-azureBucket").value.trim();
+
+    const payload = {
+
+        Status: true,
+
+        definitionName: "ObjectStoreClientAdapter",
+
+        description:
+            "Integracao com " +
+            azureHost +
+            " via RestAPI",
+
+        instParms:
+            "'TimeOut':'30000'," +
+            "'ProxyBasicAuthentication':'false'," +
+            "'MaxThreads':'6'," +
+            "'CACertList.length':'1'," +
+            "'Endpoint':'" + azureURL + "'," +
+            "'Retries':'3'," +
+            "'ProxyHost':'proxydes.host'," +
+            "'ObjectStoreType':'azure'," +
+            "'CACertList.1':'" + produtor + "_"+ azureHost +"_"+cdIntegracao+"'," +
+            "'ReadTimeOut':'30000'," +
+            "'ProxyServer':'false'," +
+            "'MinThreads':'3'," +
+            "'sslMust':'true'," +
+            "'DocumentStorageType':'fs'," +
+            "'ProxyPort':'80',"+
+			"'BucketName':'" + azureBucket + "' ",
+        serviceGroupName:
+            "CEF_" + produtor+"_"+cdIntegracao + "_GRP",
+
+        serviceName:
+            "CEF_" +
+            azureHost +
+            "_" +
+            produtor+"_"+cdIntegracao,
+
+        targetEnv: "all"
+    };
+
+    return await postApi(
+        "/serviceinstances/",
+        payload
+    );
+}
+
+
+async function criarServicoObscureParameterAzureProdutor() {
+
+    const produtor =
+        document.getElementById("produtor")
+            .value.trim();
+    const cdIntegracao = document.getElementById("cdIntegracao").textContent.trim();
+
+    const azureSecretKey =
+        document.getElementById("prod-azureSecretKey")
+            .value.trim();
+
+    const payload = {
+
+        Status: true,
+
+        definitionName: "ObscureParameter",
+
+        description:
+            "Criado via RestAPI para " +
+            produtor + "_"+ cdIntegracao,
+
+        instParms:
+            "'obscureVal0':'" +
+            azureSecretKey +
+            "'," +
+            " 'obscureName0':'secretkey'",
+
+        serviceGroupName: null,
+
+        serviceName:
+            "CEF_Obscure_Azure_" +
+            produtor+ "_"+ cdIntegracao,
+
+        targetEnv: null
+    };
+
+    return await postApi(
+        "/serviceinstances/",
+        payload
+    );
+}
+
+
+async function criarServicoObscureParameterAzure(nomeConsumidorParam, azureSecretKeyParam, serviceName) {
+	
+    const payload = {
+
+        Status: true,
+
+        definitionName: "ObscureParameter",
+
+        description:
+            "Criado via RestAPI para " + nomeConsumidorParam,
+
+        instParms:
+            "'obscureVal0':'" + azureSecretKeyParam +
+            "'," +
+            " 'obscureName0':'secretkey'",
+
+        serviceGroupName: null,
+
+        serviceName: serviceName,
+
+        targetEnv: null
+    };
+
+    return await postApi(
+        "/serviceinstances/",
+        payload
+    );
+}
+
+async function converterArquivoParaBase64(arquivo) {
+
+    return new Promise((resolve, reject) => {
+
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+
+            const base64 =
+                e.target.result.split(",")[1];
+
+            resolve(base64);
+        };
+
+        reader.onerror = reject;
+
+        reader.readAsDataURL(arquivo);
+    });
+}
+
+async function criarServicoCACertificateAzureProdutor() {
+
+    const azureURL =
+        document.getElementById("prod-azureURL")
+            .value.trim();
+
+	const cdIntegracao = document.getElementById("cdIntegracao").textContent.trim();
+	const produtor =
+        document.getElementById("produtor")
+            .value.trim();
+			
+    const arquivo =
+        document.getElementById("prod-azureCACertificate")
+            .files[0];
+
+    if (!arquivo) {
+        throw new Error(
+            "Selecione o certificado CA do Azure."
+        );
+    }
+
+    const conteudoBase64 =
+        await converterArquivoParaBase64(arquivo);
+
+    const payload = {
+
+        certData: conteudoBase64,
+
+        certGroups: null,
+
+        certName:
+            produtor+"_"+azureURL
+                .replace(/^https?:\/\//i, "")
+                .replace(/\/$/, "") + "_"+cdIntegracao,
+
+        verifyAuthChain: false,
+
+        verifyValidity: false
+    };
+
+    return await postApi(
+        "/cadigitalcertificates/",
+        payload
+    );
+}
+
+
+async function criarServicoCACertificateAzureProdutor(azureURLParam, ) {
+
+    const azureURL =
+        document.getElementById("prod-azureURL")
+            .value.trim();
+
+	const cdIntegracao = document.getElementById("cdIntegracao").textContent.trim();
+	const produtor =
+        document.getElementById("produtor")
+            .value.trim();
+			
+    const arquivo =
+        document.getElementById("prod-azureCACertificate")
+            .files[0];
+
+    if (!arquivo) {
+        throw new Error(
+            "Selecione o certificado CA do Azure."
+        );
+    }
+
+    const conteudoBase64 =
+        await converterArquivoParaBase64(arquivo);
+
+    const payload = {
+
+        certData: conteudoBase64,
+
+        certGroups: null,
+
+        certName:
+            produtor+"_"+azureURL
+                .replace(/^https?:\/\//i, "")
+                .replace(/\/$/, "") + "_"+cdIntegracao,
+
+        verifyAuthChain: false,
+
+        verifyValidity: false
+    };
+
+    return await postApi(
+        "/cadigitalcertificates/",
+        payload
+    );
+}
+
+async function criarServicoCACertificateAzure(certNameParam, conteudoBase64Param) {
+
+    const payload = {
+
+        certData: conteudoBase64Param,
+
+        certGroups: null,
+
+        certName: certNameParam,
+
+        verifyAuthChain: false,
+
+        verifyValidity: false
+    };
+
+    return await postApi(
+        "/cadigitalcertificates/",
+        payload
+    );
+}
+
+async function criarProdutor() {
+
+    const produtor =
+        document.getElementById("produtor")
+            .value.trim();
+			
+	const cdIntegracao = document.getElementById("cdIntegracao").textContent.trim();
+
+    const payload = {
+
+        addressLine1: null,
+        addressLine2: null,
+
+        appendSuffixToUsername: false,
+        asciiArmor: false,
+
+        authenticationHost: null,
+        authenticationType: "Local",
+
+        authorizedUserKeyName: null,
+
+        city: null,
+        code: null,
+
+        community: "host_COMUNIDADE01",
+
+        consumerCdConfiguration: null,
+        consumerFtpConfiguration: null,
+        consumerFtpsConfiguration: null,
+        consumerS3Configuration: null,
+        consumerSshConfiguration: null,
+        consumerWsConfiguration: null,
+
+        countryOrRegion: null,
+
+        customProtocolExtensions: null,
+        customProtocolName: null,
+
+        doesRequireCompressedData: false,
+        doesRequireEncryptedData: false,
+        doesRequireSignedData: false,
+        doesUseSSH: false,
+
+        emailAddress:
+            produtor+"_"+cdIntegracao+ "@teste.com",
+
+        givenName:
+            produtor+"_"+cdIntegracao,
+
+        isInitiatingConsumer: false,
+
+        isInitiatingProducer: true,
+
+        isListeningConsumer: false,
+
+        isListeningProducer: false,
+
+        keyEnabled: false,
+
+        mailbox: null,
+
+        partnerName:
+            produtor+"_"+cdIntegracao,
+
+        password: "123456",
+
+        passwordPolicy: null,
+
+        phone: "555-5555",
+
+        pollingInterval: null,
+
+        postalCode: null,
+
+        producerCdConfiguration: null,
+        producerFtpConfiguration: null,
+        producerFtpsConfiguration: null,
+        producerS3Configuration: null,
+        producerSshConfiguration: null,
+
+        publicKeyID: null,
+
+        remoteFilePattern: null,
+
+        sessionTimeout: null,
+
+        stateOrProvince: null,
+
+        surname:
+            produtor+"_"+cdIntegracao,
+
+        targetFileEncoding: null,
+
+        textMode: false,
+
+        timeZone: null,
+
+        useGlobalMailbox: false,
+
+        username:
+            produtor+"_"+cdIntegracao
+    };
+
+    return await postApi(
+        "/tradingpartners/",
+        payload
+    );
+}
+
+async function criarConsumidorAzure() {
+
+        console.log("Criando consumidor Azure...");
+		
+		const consumidor =
+			document.getElementById("consumidor")
+					.value.trim();
+					
+		const cdIntegracao = document.getElementById("cdIntegracao").textContent.trim();			
+		
+		const azureURL = document.getElementById("azureURL").value.trim();			
+		const azureBucket = document.getElementById("azureBucket").value.trim();
+				
+		 const azureHost =
+			azureURL
+            .replace(/^https?:\/\//i, "")
+            .replace(/\/$/, "");
+		
+		const azureServicoGroup = "CEF_" +
+            azureHost +
+            "_" +
+            consumidor +"_"+cdIntegracao+
+            "_GRP";	
+		
+		
+        const payloadConsumidor = {
+
+            addressLine1: null,
+            addressLine2: null,
+            appendSuffixToUsername: false,
+            asciiArmor: false,
+            authenticationHost: null,
+            authenticationType: "Local",
+            authorizedUserKeyName: null,
+            city: null,
+            code: null,
+
+            community: "host_COMUNIDADE01",
+
+            consumerCdConfiguration: null,
+            consumerFtpConfiguration: null,
+            consumerFtpsConfiguration: null,
+            consumerS3Configuration: null,
+            consumerSshConfiguration: null,
+            consumerWsConfiguration: null,
+
+            countryOrRegion: "BR",
+
+            customProtocolExtensions:
+                "host_FG_Route_Azure_bucketname: " + azureBucket +
+                ",PROTOCOLBPNAME:host_FG_Route_Azure," +
+                "host_FG_Route_Azure_Objectstoreclientadapter:" + azureServicoGroup + ",",
+
+            customProtocolName: "host-azure-protocol",
+
+            doesRequireCompressedData: false,
+            doesRequireEncryptedData: false,
+            doesRequireSignedData: false,
+            doesUseSSH: false,
+
+            emailAddress:
+                consumidor +"_"+cdIntegracao+ "@teste.com",
+
+            givenName: consumidor+"_"+cdIntegracao,
+
+            isInitiatingConsumer: false,
+            isInitiatingProducer: false,
+
+            isListeningConsumer: true,
+            isListeningProducer: false,
+
+            keyEnabled: false,
+
+            mailbox: null,
+
+            partnerName: consumidor+"_"+cdIntegracao,
+
+            password: "123456",
+
+            passwordPolicy: null,
+
+            phone: "555-5555",
+
+            pollingInterval: null,
+
+            postalCode: null,
+
+            producerCdConfiguration: null,
+            producerFtpConfiguration: null,
+            producerFtpsConfiguration: null,
+            producerS3Configuration: null,
+            producerSshConfiguration: null,
+
+            publicKeyID: null,
+
+            remoteFilePattern: null,
+
+            sessionTimeout: null,
+
+            stateOrProvince: null,
+
+            surname: consumidor+"_"+cdIntegracao,
+
+            targetFileEncoding: null,
+
+            textMode: false,
+
+            timeZone: null,
+
+            useGlobalMailbox: false,
+
+            username: consumidor+"_"+cdIntegracao
+        };
+
+        await postApi(
+            "/tradingpartners/",
+            payloadConsumidor
+        );
+}
+
+
+
+
+async function criarConsumidorNFS() {
+
+		const cdIntegracao = document.getElementById("cdIntegracao").textContent.trim();
+
+        console.log("Criando consumidor NFS...");
+		
+		const consumidor =
+			document.getElementById("consumidor")
+					.value.trim();
+
+        const payloadConsumidor = {
+
+            addressLine1: null,
+            addressLine2: null,
+            appendSuffixToUsername: false,
+            asciiArmor: false,
+            authenticationHost: null,
+            authenticationType: "Local",
+            authorizedUserKeyName: null,
+            city: null,
+            code: null,
+
+            community: "host_COMUNIDADE01",
+
+            consumerCdConfiguration: null,
+            consumerFtpConfiguration: null,
+            consumerFtpsConfiguration: null,
+            consumerS3Configuration: null,
+            consumerSshConfiguration: null,
+            consumerWsConfiguration: null,
+
+            countryOrRegion: "BR",
+			
+            customProtocolExtensions:
+                "host_AFTRouteViaExtractFSA_EMAIL_SUCESSO:YES," +
+                "host_AFTRouteViaExtractFSA_EMAIL_ERRO:NO," +
+                "host_AFTRouteViaExtractFSA_PREFIX_LOG:SIXPT_CUSTOM," +
+                "PROTOCOLBPNAME:host_AFTRouteViaExtractFSA," +
+                "host_AFTRouteViaExtractFSA_LOG_DEFAULT:YES," +
+                "host_AFTRouteViaExtractFSA_PATH_EXTRACT_FSA:" +
+                obterDestinoSelecionado().trim() + "," +
+                "host_AFTRouteViaExtractFSA_IDFLOW:ID-host-123456," +
+                "host_AFTRouteViaExtractFSA_LISTA_EMAIL:xpto@mail.com," +
+                "host_AFTRouteViaExtractFSA_LOG_CUSTOM:YES," +
+                "host_AFTRouteViaExtractFSA_PATH_CUSTOM:/NFS/LAB/SFG/FLUXOS/SIXPT/LogCustom,",
+
+
+            customProtocolName:
+                "host-fsa-extract-protocol",
+
+            doesRequireCompressedData: false,
+            doesRequireEncryptedData: false,
+            doesRequireSignedData: false,
+            doesUseSSH: false,
+
+            emailAddress:
+                consumidor + "@teste.com",
+
+            givenName: consumidor+"_"+cdIntegracao,
+
+            isInitiatingConsumer: false,
+            isInitiatingProducer: false,
+
+            isListeningConsumer: true,
+            isListeningProducer: false,
+
+            keyEnabled: false,
+
+            mailbox: null,
+
+            partnerName: consumidor+"_"+cdIntegracao,
+
+            password: "123456",
+
+            passwordPolicy: null,
+
+            phone: "555-5555",
+
+            pollingInterval: null,
+
+            postalCode: null,
+
+            producerCdConfiguration: null,
+            producerFtpConfiguration: null,
+            producerFtpsConfiguration: null,
+            producerS3Configuration: null,
+            producerSshConfiguration: null,
+
+            publicKeyID: null,
+
+            remoteFilePattern: null,
+
+            sessionTimeout: null,
+
+            stateOrProvince: null,
+
+            surname: consumidor+"_"+cdIntegracao,
+
+            targetFileEncoding: null,
+
+            textMode: false,
+
+            timeZone: null,
+
+            useGlobalMailbox: false,
+
+            username: consumidor+"_"+cdIntegracao
+        };
+
+        await postApi(
+            "/tradingpartners/",
+            payloadConsumidor
+        );
+}
+
+async function criarConsumidorBrowser() {
+
+    const consumidor =
+        document.getElementById("consumidor")
+            .value.trim();
+
+    const payload = {
+
+        addressLine1: null,
+        addressLine2: null,
+        appendSuffixToUsername: false,
+        asciiArmor: false,
+
+        authenticationHost: null,
+        authenticationType: "Local",
+
+        authorizedUserKeyName: null,
+
+        city: null,
+        code: null,
+
+        community: "host_COMUNIDADE01",
+
+        consumerCdConfiguration: null,
+        consumerFtpConfiguration: null,
+        consumerFtpsConfiguration: null,
+        consumerS3Configuration: null,
+        consumerSshConfiguration: null,
+        consumerWsConfiguration: null,
+
+        countryOrRegion: "BR",
+
+        doesRequireCompressedData: false,
+        doesRequireEncryptedData: false,
+        doesRequireSignedData: false,
+        doesUseSSH: false,
+
+        emailAddress:
+            consumidor + "@teste.com",
+
+        givenName:
+            consumidor,
+
+        isInitiatingConsumer: true,
+        isInitiatingProducer: false,
+
+        isListeningConsumer: false,
+        isListeningProducer: false,
+
+        keyEnabled: false,
+
+        mailbox: null,
+
+        partnerName:
+            consumidor,
+
+        password: "123456",
+
+        passwordPolicy: null,
+
+        phone: "555-5555",
+
+        pollingInterval: null,
+
+        postalCode: null,
+
+        producerCdConfiguration: null,
+        producerFtpConfiguration: null,
+        producerFtpsConfiguration: null,
+        producerS3Configuration: null,
+        producerSshConfiguration: null,
+
+        publicKeyID: null,
+
+        remoteFilePattern: null,
+
+        sessionTimeout: null,
+
+        stateOrProvince: null,
+
+        surname:
+            consumidor,
+
+        targetFileEncoding: null,
+
+        textMode: false,
+
+        timeZone: null,
+
+        useGlobalMailbox: false,
+
+        username:
+            consumidor
+    };
+
+    return await postApi(
+        "/tradingpartners/",
+        payload
+    );
+}
+
+
+
+
+async function criarBP_Servicos(mailboxProdutor) {
+		const cdIntegracao = document.getElementById("cdIntegracao").textContent.trim();
+		
+           /* ====================================================
+           6 - CRIAR BP
+           ==================================================== */
+
+        console.log("Criando BP...");
+		const produtor = document.getElementById("produtor").value.trim();
+
+        const bpName =
+            "" + produtor+"_"+cdIntegracao + "";
+
+        await postApi(
+            "/workflows/",
+            {
+
+                businessProcess:
+`<process name="${bpName}">
+   <sequence>
+   
+      <operation name="Transport">
+	   <participant name="InvokeBusinessProcessService"/> 
+		   <output message="Xout"> 
+			 <assign to="." from="*"></assign> 
+			 <assign to="WFD_NAME">host_FG_Route_Azure_ColetarArquivos</assign>
+			 <assign to="INVOKE_MODE">INLINE</assign>		 		 
+		   </output> 
+		   <input message="Xin" > 
+			  <assign to="." from="*"></assign> 
+		   </input> 
+		</operation>
+     
+   </sequence>
+</process>`,
+
+                description:
+                    "Criado via RestApi produtor " +
+                    produtor+"_"+cdIntegracao,
+
+                documentStorage: 1,
+                enableBusinessProcess: true,
+
+                queue: 6,
+
+                recoveryLevel: 3,
+
+                removalMethod: 1,
+
+                useBPQueuing: true,
+
+                lifespanHours: 2,
+
+                name: bpName
+            }
+        );
+
+        /* ====================================================
+           7 - CRIAR SCHEDULE Azure com NFS
+           ==================================================== */
+
+        console.log("Criando Schedule...");
+		
+		const agendamento =
+            parseInt(
+                document.getElementById("prod-azure-agendamento").value,
+                10
+            );
+		
+		 const prod_azure_pastaarquivado =
+				document.getElementById("prod-azure-pastaarquivado")
+					.value.trim();
+
+		const prod_azure_pastaorigem =
+				document.getElementById("prod-azure-pastaorigem")
+					.value.trim();
+
+        await postApi(
+            "/schedules/",
+            {
+                bpNameValuePairs: [
+					{
+						append: false,
+						name: "azure_servico_grupo",
+						val: "CEF_" + produtor + "_"+cdIntegracao + "_GRP"
+					},
+					{
+						append: false,
+						name: "azure_servico_obscure",
+						val: "CEF_Obscure_Azure_" + produtor + "_"+cdIntegracao
+					},
+					{
+						append: false,
+						name: "azure_filtro",
+						val: ".+"
+					},
+					{
+						append: false,
+						name: "azure_dir_consumido",
+						val: prod_azure_pastaarquivado
+					},
+					
+					{
+						append: false,
+						name: "azure_dir_origem",
+						val: prod_azure_pastaorigem
+					},
+					{
+						append: false,
+						name: "b2b_mbx_produtor",
+						val: mailboxProdutor
+					}
+				],
+
+                businessProcess:
+                    bpName,
+
+                dailySchedule: null,
+
+                dateExclusions: null,
+
+                monthlySchedule: null,
+
+                runAsUser: "admin",
+
+                runAtStartUp: false,
+
+                scheduleExclusions: null,
+
+                timerSchedule: {
+                    hours: 0,
+                    minutes: agendamento
+                },
+
+                weeklySchedule: null
+            }
+        );
+
+
+
+}
+
+
+async function criarColetorAzureServicos(nomeProdutor, agendamentoParam, mailboxProdutor, prod_azure_pastaorigem, prod_azure_pastaarquivado, azureServicoGroup, azureServicoObscure) {
+				
+           /* ====================================================
+           CRIAR BP
+           ==================================================== */
+
+        console.log("Criando BP...");
+        const bpName = "CEF_ColetorAzure_" + nomeProdutor;
+
+        await postApi(
+            "/workflows/",
+            {
+
+                businessProcess:
+`<process name="${bpName}">
+   <sequence>
+   
+      <operation name="Transport">
+	   <participant name="InvokeBusinessProcessService"/> 
+		   <output message="Xout"> 
+			 <assign to="." from="*"></assign> 
+			 <assign to="WFD_NAME">host_FG_Route_Azure_ColetarArquivos</assign>
+			 <assign to="INVOKE_MODE">INLINE</assign>		 		 
+		   </output> 
+		   <input message="Xin" > 
+			  <assign to="." from="*"></assign> 
+		   </input> 
+		</operation>
+     
+   </sequence>
+</process>`,
+
+                description:
+                    "Criado via RestApi produtor " +nomeProdutor,
+                documentStorage: 1,
+                enableBusinessProcess: true,
+
+                queue: 6,
+
+                recoveryLevel: 3,
+
+                removalMethod: 1,
+
+                useBPQueuing: true,
+
+                lifespanHours: 2,
+
+                name: bpName
+            }
+        );
+
+        /* ====================================================
+           7 - CRIAR SCHEDULE Azure com NFS
+           ==================================================== */
+
+        console.log("Criando Schedule...");
+		
+
+        await postApi(
+            "/schedules/",
+            {
+                bpNameValuePairs: [
+					{
+						append: false,
+						name: "azure_servico_grupo",
+						val: azureServicoGroup
+					},
+					{
+						append: false,
+						name: "azure_servico_obscure",
+						val: azureServicoObscure
+					},
+					{
+						append: false,
+						name: "azure_filtro",
+						val: ".+"
+					},
+					{
+						append: false,
+						name: "azure_dir_consumido",
+						val: prod_azure_pastaarquivado
+					},
+					
+					{
+						append: false,
+						name: "azure_dir_origem",
+						val: prod_azure_pastaorigem
+					},
+					{
+						append: false,
+						name: "b2b_mbx_produtor",
+						val: mailboxProdutor
+					}
+				],
+
+                businessProcess:
+                    bpName,
+
+                dailySchedule: null,
+
+                dateExclusions: null,
+
+                monthlySchedule: null,
+
+                runAsUser: "admin",
+
+                runAtStartUp: false,
+
+                scheduleExclusions: null,
+
+                timerSchedule: {
+                    hours: 0,
+                    minutes: agendamentoParam
+                },
+
+                weeklySchedule: null
+            }
+        );
+}
+
+async function criarCanal() {
+
+    const produtor =
+        document.getElementById("produtor")
+            .value.trim();
+    const cdIntegracao = document.getElementById("cdIntegracao").textContent.trim();
+    const consumidor =
+        document.getElementById("consumidor")
+            .value.trim();
+
+    const payload = {
+
+        consumer:
+            consumidor+"_"+cdIntegracao,
+
+        producer:
+            produtor+"_"+cdIntegracao,
+
+        provisioningFacts: [
+					{
+						provFactName: "myProtocolo",
+						provFactValue: "browser"
+					}
+		],
+
+        templateName:
+            "T_SIMPLES_INFRA_BROWSER"
+    };
+
+    return await postApi(
+        "/routingchannels/",
+        payload
+    );
+}
+
+async function validarIntegracaoBrowserAzure() {
+
+    const produtor =
+        document.getElementById("produtor")
+            .value.trim();
+
+    const consumidor =
+        document.getElementById("consumidor")
+            .value.trim();
+			
+	const cdIntegracao = document.getElementById("cdIntegracao").textContent.trim();
+
+    const url =
+        "https://fgw.des.cluster1.node1.host:5076" +
+        "/B2BAPIs/svc/routingchannelduplicatechecks/" +
+        "?_range=0-999" +
+        "&producer=" +
+        encodeURIComponent(produtor+"_"+cdIntegracao) +
+        "&consumer=" +
+        encodeURIComponent(consumidor+"_"+cdIntegracao) +
+        "&template=T_SIMPLES_INFRA_BROWSER" +
+		"&provisionalFacts=" +
+		encodeURIComponent("myProtocolo:" + "browser");
+
+    const response =
+        await fetch(url, {
+            method: "GET",
+            headers: {
+                "Accept":"application/json",
+                "Content-Type":"application/json",
+                "Authorization":
+                    "Basic " +
+                    btoa("infrafacil:123456")
+            }
+        });
+
+    if (!response.ok) {
+
+        throw new Error(
+            "Erro na validação da integração."
+        );
+    }
+
+    const retorno =
+        await response.json();
+
+    const existe =
+        retorno?.[0]?.exists?.code === true;
+
+    if (existe) {
+
+        throw new Error(
+            "Integração já existente."
+        );
+    }
+
+    return true;
+}
+
+async function validarIntegracaoBrowserNFS() {
+
+    const produtor =
+        document.getElementById("produtor")
+            .value.trim();
+
+    const consumidor =
+        document.getElementById("consumidor")
+            .value.trim();
+
+    const url =
+        "https://fgw.des.cluster1.node1.host:5076" +
+        "/B2BAPIs/svc/routingchannelduplicatechecks/" +
+        "?_range=0-999" +
+        "&producer=" +
+        encodeURIComponent(produtor) +
+        "&consumer=" +
+        encodeURIComponent(consumidor) +
+        "&template=T_SIMPLES_INFRA_BROWSER" +
+		"&provisionalFacts=" +
+		encodeURIComponent("myProtocolo:" + "browser");
+
+    const response =
+        await fetch(url, {
+            method: "GET",
+            headers: {
+                "Accept":"application/json",
+                "Content-Type":"application/json",
+                "Authorization":
+                    "Basic " +
+                    btoa("infrafacil:123456")
+            }
+        });
+
+    if (!response.ok) {
+
+        throw new Error(
+            "Erro na validação da integração."
+        );
+    }
+
+    const retorno =
+        await response.json();
+
+    const existe =
+        retorno?.[0]?.exists?.code === true;
+
+    if (existe) {
+
+        throw new Error(
+            "Integração já existente."
+        );
+    }
+
+    return true;
+}
+
+async function validarIntegracaoBrowser() {
+
+    const produtor =
+        document.getElementById("produtor")
+            .value.trim();
+
+    const consumidor =
+        document.getElementById("consumidor")
+            .value.trim();
+
+    const url =
+        "https://fgw.des.cluster1.node1.host:5076" +
+        "/B2BAPIs/svc/routingchannelduplicatechecks/" +
+        "?_range=0-999" +
+        "&producer=" +
+        encodeURIComponent(produtor) +
+        "&consumer=" +
+        encodeURIComponent(consumidor) +
+        "&template=T_SIMPLES_INFRA_BROWSER" +
+		"&provisionalFacts=" +
+		encodeURIComponent("myProtocolo:" + "browser");
+
+    const response =
+        await fetch(url, {
+            method: "GET",
+            headers: {
+                "Accept":"application/json",
+                "Content-Type":"application/json",
+                "Authorization":
+                    "Basic " +
+                    btoa("infrafacil:123456")
+            }
+        });
+
+    if (!response.ok) {
+
+        throw new Error(
+            "Erro na validação da integração."
+        );
+    }
+
+    const retorno =
+        await response.json();
+
+    const existe =
+        retorno?.[0]?.exists?.code === true;
+
+    if (existe) {
+
+        throw new Error(
+            "Integração já existente."
+        );
+    }
+
+    return true;
+}
+
+async function criarIntegracaoNfsComBrowser() {
+
+    try {
+	
+		const cdIntegracao = document.getElementById("cdIntegracao").textContent.trim();
+		console.log("Criado Integracao ..." + cdIntegracao);
+
+        const produtor =
+            document.getElementById("produtor").value.trim();
+
+        const consumidor =
+            document.getElementById("consumidor").value.trim();
+
+        const origemNfs = obterOrigemSelecionada().trim();
+
+        const destinoNfs = obterDestinoSelecionado().trim();
+
+        const agendamento =
+            parseInt(
+                document.getElementById("agendamento").value,
+                10
+            );
+
+        if (!produtor) {
+            mostrarNotificacao("aviso", "Informe o Produtor.");
+            return;
+        }
+
+        if (!consumidor) {
+            mostrarNotificacao("aviso", "Informe o Consumidor.");
+            return;
+        }
+
+        if (!origemNfs) {
+            mostrarNotificacao("aviso", "Informe a Origem NFS.");
+            return;
+        }
+
+        if (!destinoNfs) {
+            mostrarNotificacao("aviso", "Informe o Destino NFS.");
+            return;
+        }
+			
+		
+        /* ====================================================
+           1 - CRIAR PRODUTOR
+           ==================================================== */
+
+        console.log("Criando produtor...");
+
+        const payloadProdutor = {
+
+            addressLine1: null,
+            addressLine2: null,
+            appendSuffixToUsername: false,
+            asciiArmor: false,
+            authenticationHost: null,
+            authenticationType: "Local",
+            authorizedUserKeyName: null,
+            city: null,
+            code: null,
+            community: "host_COMUNIDADE01",
+
+            consumerCdConfiguration: null,
+            consumerFtpConfiguration: null,
+            consumerFtpsConfiguration: null,
+            consumerS3Configuration: null,
+            consumerSshConfiguration: null,
+            consumerWsConfiguration: null,
+
+            countryOrRegion: null,
+            customProtocolExtensions: null,
+            customProtocolName: null,
+
+            doesRequireCompressedData: false,
+            doesRequireEncryptedData: false,
+            doesRequireSignedData: false,
+            doesUseSSH: false,
+
+            emailAddress: produtor+"_"+cdIntegracao + "@teste.com",
+
+            givenName: produtor+"_"+cdIntegracao,
+
+            isInitiatingConsumer: false,
+            isInitiatingProducer: true,
+
+            isListeningConsumer: false,
+            isListeningProducer: false,
+
+            keyEnabled: false,
+
+            mailbox: null,
+
+            partnerName: produtor+"_"+cdIntegracao,
+
+            password: "123456",
+
+            passwordPolicy: null,
+
+            phone: "555-5555",
+
+            pollingInterval: null,
+
+            postalCode: null,
+
+            producerCdConfiguration: null,
+            producerFtpConfiguration: null,
+            producerFtpsConfiguration: null,
+            producerS3Configuration: null,
+            producerSshConfiguration: null,
+
+            publicKeyID: null,
+
+            remoteFilePattern: null,
+
+            sessionTimeout: null,
+
+            stateOrProvince: null,
+
+            surname: produtor+"_"+cdIntegracao,
+
+            targetFileEncoding: null,
+
+            textMode: false,
+
+            timeZone: null,
+
+            useGlobalMailbox: false,
+
+            username: produtor+"_"+cdIntegracao
+        };
+
+        await postApi(
+            "/tradingpartners/",
+            payloadProdutor
+        );
+		
+		
+        /* ====================================================
+           2 - CRIAR CONSUMIDOR
+           ==================================================== */
+
+        console.log("Criando consumidor...");
+
+        const payloadConsumidor = {
+
+            addressLine1: null,
+            addressLine2: null,
+            appendSuffixToUsername: false,
+            asciiArmor: false,
+            authenticationHost: null,
+            authenticationType: "Local",
+            authorizedUserKeyName: null,
+            city: null,
+            code: null,
+
+            community: "host_COMUNIDADE01",
+
+            consumerCdConfiguration: null,
+            consumerFtpConfiguration: null,
+            consumerFtpsConfiguration: null,
+            consumerS3Configuration: null,
+            consumerSshConfiguration: null,
+            consumerWsConfiguration: null,
+
+            countryOrRegion: "BR",
+			
+            customProtocolExtensions:
+                "host_AFTRouteViaExtractFSA_EMAIL_SUCESSO:YES," +
+                "host_AFTRouteViaExtractFSA_EMAIL_ERRO:NO," +
+                "host_AFTRouteViaExtractFSA_PREFIX_LOG:SIXPT_CUSTOM," +
+                "PROTOCOLBPNAME:host_AFTRouteViaExtractFSA," +
+                "host_AFTRouteViaExtractFSA_LOG_DEFAULT:YES," +
+                "host_AFTRouteViaExtractFSA_PATH_EXTRACT_FSA:" +
+                destinoNfs + "," +
+                "host_AFTRouteViaExtractFSA_IDFLOW:ID-host-123456," +
+                "host_AFTRouteViaExtractFSA_LISTA_EMAIL:xpto@mail.com," +
+                "host_AFTRouteViaExtractFSA_LOG_CUSTOM:YES," +
+                "host_AFTRouteViaExtractFSA_PATH_CUSTOM:/NFS/LAB/SFG/FLUXOS/SIXPT/LogCustom,",
+
+
+            customProtocolName:
+                "host-fsa-extract-protocol",
+
+            doesRequireCompressedData: false,
+            doesRequireEncryptedData: false,
+            doesRequireSignedData: false,
+            doesUseSSH: false,
+
+            emailAddress:
+                consumidor+"_"+cdIntegracao + "@teste.com",
+
+            givenName: consumidor+"_"+cdIntegracao,
+
+            isInitiatingConsumer: false,
+            isInitiatingProducer: false,
+
+            isListeningConsumer: true,
+            isListeningProducer: false,
+
+            keyEnabled: false,
+
+            mailbox: null,
+
+            partnerName: consumidor+"_"+cdIntegracao,
+
+            password: "123456",
+
+            passwordPolicy: null,
+
+            phone: "555-5555",
+
+            pollingInterval: null,
+
+            postalCode: null,
+
+            producerCdConfiguration: null,
+            producerFtpConfiguration: null,
+            producerFtpsConfiguration: null,
+            producerS3Configuration: null,
+            producerSshConfiguration: null,
+
+            publicKeyID: null,
+
+            remoteFilePattern: null,
+
+            sessionTimeout: null,
+
+            stateOrProvince: null,
+
+            surname: consumidor+"_"+cdIntegracao,
+
+            targetFileEncoding: null,
+
+            textMode: false,
+
+            timeZone: null,
+
+            useGlobalMailbox: false,
+
+            username: consumidor+"_"+cdIntegracao
+        };
+
+        await postApi(
+            "/tradingpartners/",
+            payloadConsumidor
+        );
+		
+		
+		/* ====================================================
+		   3 - VALIDAR INTEGRAÇÃO
+		   ==================================================== */
+
+		console.log("Validando Integração...");
+
+		const origemCanal =
+			origemNfs
+				.replace(/^\/+|\/+$/g, "")
+				.replaceAll("/", "_");
+
+		
+		/* ====================================================
+			4 - CRIAR CANAL
+		==================================================== */
+		console.log("Criando Canal...");
+
+		await postApi(
+			"/routingchannels/",
+			{
+				consumer: consumidor+"_"+cdIntegracao,
+
+				producer: produtor+"_"+cdIntegracao,
+
+				provisioningFacts: [
+					{
+						provFactName: "myNFS",
+						provFactValue: origemCanal
+					}
+				],
+
+				templateName: "T_SIMPLES_INFRA"
+			}
+		);
+				/* ====================================================
+           Obter Mailbox do Canal 
+           ==================================================== */
+		   
+		const mailboxPath = await obterProducerMailboxPath(
+				encodeURIComponent(produtor), 
+				encodeURIComponent(consumidor), 
+				"T_SIMPLES_INFRA"
+			);
+		
+        console.log("Mailbox: ${mailboxPath}");
+
+		        
+
+
+		
+		console.log("Criando FSA...");
+		
+		const serviceNameTxt = "host_FSA_COLLECT_" + produtor +"_"+cdIntegracao;
+		const bpName =         "host_FSA_COLLECT_" + produtor+"_"+cdIntegracao;
+
+        await postApi(
+            "/serviceinstances/",
+            {
+                Status: true,				
+                definitionName: "FileSystem",
+                description:
+                    "Criar via RestApi produtor " +
+                    produtor,
+
+                instParms:
+                    "'docStorageType':'sd'," +
+                    "'bootstrap':'true'," +
+                    "'assignFilename':'false'," +
+                    "'keepPath':'false'," +
+                    "'userParm1':'" + cdIntegracao +"', " +
+                    "'userParm2':'" + mailboxPath+ "'," +
+                    "'userParm3':'NFS'," +
+                    "'extractionFolder':'/NFS/NULL'," +
+                    "'initialWorkFlowId':'host_COLLECT_ARQ_FG-DEFAULT'," +
+                    "'collectionFolder':'" +
+                    origemNfs +
+                    "'," +
+                    "'useSubFolders':'false'",
+
+                serviceGroupName:
+                    "G_FSA_" + produtor+"_"+cdIntegracao,
+
+                serviceName: serviceNameTxt,
+
+                targetEnv: "all"
+            }
+        );
+		
+		
+
+        /* ====================================================
+           6 - CRIAR BP
+           ==================================================== */
+
+        console.log("Criando BP...");
+
+        
+
+        await postApi(
+            "/workflows/",
+            {
+
+                businessProcess:
+`<process name="${bpName}">
+   <sequence>
+      <operation name="Service">
+         <participant name="${serviceNameTxt}"/>
+         <output message="Xout">
+            <assign to="." from="*"/>
+            <assign to="Action">FS_COLLECT</assign>
+         </output>
+         <input message="Xin">
+            <assign to="." from="*"/>
+         </input>
+      </operation>
+   </sequence>
+</process>`,
+
+                description:
+                    "Criado via RestApi produtor " +
+                    produtor +"_"+cdIntegracao,
+
+                documentStorage: 1,
+                enableBusinessProcess: true,
+
+                queue: 6,
+
+                recoveryLevel: 3,
+
+                removalMethod: 1,
+
+                useBPQueuing: true,
+
+                lifespanHours: 2,
+
+                name: bpName
+            }
+        );
+
+        /* ====================================================
+           7 - CRIAR SCHEDULE
+           ==================================================== */
+
+        console.log("Criando Schedule...");
+
+        await postApi(
+            "/schedules/",
+            {
+                bpNameValuePairs: [
+					{
+						append: false,
+						name: "maxCollect",
+						val: "10"
+					},
+					{
+						append: false,
+						name: "AAA",
+						val: "BBB"
+					}
+				],
+
+                businessProcess:
+                    bpName,
+
+                dailySchedule: null,
+
+                dateExclusions: null,
+
+                monthlySchedule: null,
+
+                runAsUser: "admin",
+
+                runAtStartUp: false,
+
+                scheduleExclusions: null,
+
+                timerSchedule: {
+                    hours: 0,
+                    minutes: agendamento
+                },
+
+                weeklySchedule: null
+            }
+        );
+
+        mostrarNotificacao("sucesso", "Integração criada com sucesso!");
+
+    }
+    catch (e) {
+
+        console.error(e);
+
+        mostrarNotificacao("erro", "Erro ao criar integração: " + e.message);
+    }
+}
+
+
+async function criarConsumidor(tipoConsumidor, nomeConsumidor, customProtocolNameParam, customProtocolExtensionsParam) {
+
+        /* ====================================================
+           CRIAR CONSUMIDOR
+           ==================================================== */
+
+        console.log("Criando consumidor... " + nomeConsumidor);
+		
+        let payloadConsumidor = {
+
+            addressLine1: null,
+            addressLine2: null,
+            appendSuffixToUsername: false,
+            asciiArmor: false,
+            authenticationHost: null,
+            authenticationType: "Local",
+            authorizedUserKeyName: null,
+            city: null,
+            code: null,
+
+            community: "host_COMUNIDADE01",
+
+            consumerCdConfiguration: null,
+            consumerFtpConfiguration: null,
+            consumerFtpsConfiguration: null,
+            consumerS3Configuration: null,
+            consumerSshConfiguration: null,
+            consumerWsConfiguration: null,
+
+            countryOrRegion: "BR",
+
+            doesRequireCompressedData: false,
+            doesRequireEncryptedData: false,
+            doesRequireSignedData: false,
+            doesUseSSH: false,
+
+            emailAddress:
+                nomeConsumidor+ "@teste.com",
+
+            givenName: nomeConsumidor,
+
+            isInitiatingConsumer: false,
+            isInitiatingProducer: false,
+
+            isListeningConsumer: true,
+            isListeningProducer: false,
+
+            keyEnabled: false,
+
+            mailbox: null,
+
+            partnerName: nomeConsumidor,
+
+            password: "123456",
+
+            passwordPolicy: null,
+
+            phone: "555-5555",
+
+            pollingInterval: null,
+
+            postalCode: null,
+
+            producerCdConfiguration: null,
+            producerFtpConfiguration: null,
+            producerFtpsConfiguration: null,
+            producerS3Configuration: null,
+            producerSshConfiguration: null,
+
+            publicKeyID: null,
+
+            remoteFilePattern: null,
+
+            sessionTimeout: null,
+
+            stateOrProvince: null,
+
+            surname: nomeConsumidor,
+
+            targetFileEncoding: null,
+
+            textMode: false,
+
+            timeZone: null,
+
+            useGlobalMailbox: false,
+
+            username: nomeConsumidor
+        };
+		
+		
+		switch (tipoConsumidor) {
+			case "NFS":
+				console.log("Tipo NFS");
+						
+				 payloadConsumidor.customProtocolExtensions = customProtocolExtensionsParam;
+				 payloadConsumidor.customProtocolName= customProtocolNameParam;
+				 
+				break;
+
+			case "BROWSER":
+			    console.log("Tipo BROWSER");
+				
+				delete payloadConsumidor.customProtocolName;
+				delete payloadConsumidor.customProtocolExtensions;
+				
+				payloadConsumidor.isInitiatingConsumer= true;
+				payloadConsumidor.isInitiatingProducer= false;
+
+				payloadConsumidor.isListeningConsumer= false;
+				payloadConsumidor.isListeningProducer= false;
+				
+				break;
+
+			case "AZURE":
+				 console.log("Tipo AZURE");
+				 payloadConsumidor.customProtocolExtensions = customProtocolExtensionsParam;
+			     payloadConsumidor.customProtocolName= customProtocolNameParam;
+		
+				break;
+
+			default:
+				// padrão
+		}
+		
+        await postApi(
+            "/tradingpartners/",
+            payloadConsumidor
+        );
+
+}
+
+async function criarProdutor(tipo, nomeProdutor) {
+
+
+     /* ====================================================
+           1 - CRIAR PRODUTOR
+        ==================================================== */
+
+        console.log("Criando produtor... " + nomeProdutor   + " Tipo:"+tipo);
+
+        const payloadProdutor = {
+
+            addressLine1: null,
+            addressLine2: null,
+            appendSuffixToUsername: false,
+            asciiArmor: false,
+            authenticationHost: null,
+            authenticationType: "Local",
+            authorizedUserKeyName: null,
+            city: null,
+            code: null,
+            community: "host_COMUNIDADE01",
+
+            consumerCdConfiguration: null,
+            consumerFtpConfiguration: null,
+            consumerFtpsConfiguration: null,
+            consumerS3Configuration: null,
+            consumerSshConfiguration: null,
+            consumerWsConfiguration: null,
+
+            countryOrRegion: null,
+            customProtocolExtensions: null,
+            customProtocolName: null,
+
+            doesRequireCompressedData: false,
+            doesRequireEncryptedData: false,
+            doesRequireSignedData: false,
+            doesUseSSH: false,
+
+            emailAddress: nomeProdutor + "@teste.com",
+
+            givenName: nomeProdutor,
+
+            isInitiatingConsumer: false,
+            isInitiatingProducer: true,
+
+            isListeningConsumer: false,
+            isListeningProducer: false,
+
+            keyEnabled: false,
+
+            mailbox: null,
+
+            partnerName: nomeProdutor,
+
+            password: "123456",
+
+            passwordPolicy: null,
+
+            phone: "555-5555",
+
+            pollingInterval: null,
+
+            postalCode: null,
+
+            producerCdConfiguration: null,
+            producerFtpConfiguration: null,
+            producerFtpsConfiguration: null,
+            producerS3Configuration: null,
+            producerSshConfiguration: null,
+
+            publicKeyID: null,
+
+            remoteFilePattern: null,
+
+            sessionTimeout: null,
+
+            stateOrProvince: null,
+
+            surname: nomeProdutor,
+
+            targetFileEncoding: null,
+
+            textMode: false,
+
+            timeZone: null,
+
+            useGlobalMailbox: false,
+
+            username: nomeProdutor
+        };
+
+        await postApi(
+            "/tradingpartners/",
+            payloadProdutor
+        );
+		
+}
+
+async function criarComponentesProdutor_NFS(nomeProdutor, agendamento, origemNfs, mailboxDestino) {
+
+	    console.log("Criando FSA...");
+		
+		/* ====================================================
+           CRIAR FSA
+        ==================================================== */
+		
+		const serviceNameTxt      = "CEF_FSA_COLLECT_" + nomeProdutor;
+		const grupoServiceNameTxt = "CEF_GRP_FSA_" + nomeProdutor;
+		const bpName              = "CEF_FSA_COLLECT_" + nomeProdutor;
+		const subBPName           = "CEF_FSA_COLLECT_SubProcessamentoComun";
+		
+        await postApi(
+            "/serviceinstances/",
+            {
+                Status: true,				
+                definitionName: "FileSystem",
+                description:
+                    "Criar via RestApi produtor " + nomeProdutor,
+
+                instParms:
+                    "'docStorageType':'sd'," +                    
+					 "'bootstrap':'false'," +
+                    "'assignFilename':'false'," +
+                    "'keepPath':'false'," +                    
+                    "'extractionFolder':'/NFS/NULL'," +                    
+                    "'collectionFolder':'" + origemNfs + "'," +
+                    "'useSubFolders':'false'",
+
+                serviceGroupName: grupoServiceNameTxt,
+                serviceName: serviceNameTxt,
+                targetEnv: "all"
+            }
+        );
+		
+		
+		
+		/* ====================================================
+           CRIAR BP Coletor de arquivos no DISCO
+           ==================================================== */
+
+			console.log("Criando BP...: " + bpName);       
+
+			await postApi(
+				"/workflows/",
+				{
+
+				businessProcess:
+					`<process name="${bpName}">
+					   <sequence name="Infrafacil">     
+						<operation name="Service">
+							<participant name="${serviceNameTxt}"/>
+							<output message="Xout">
+								<assign to="." from="*"/>
+								<assign to="Action">FS_COLLECT</assign>
+							</output>
+							<input message="Xin">
+								<assign to="." from="*"/>
+							</input>
+						</operation>
+						<operation name="Transport">
+							<participant name="InvokeBusinessProcessService"/> 
+							   <output message="Xout"> 
+								 <assign to="." from="*"></assign> 
+								 <assign to="WFD_NAME">${subBPName}</assign>
+								 <assign to="INVOKE_MODE">INLINE</assign>		 		 
+							   </output> 
+							   <input message="Xin" > 
+								  <assign to="." from="*"></assign> 
+							   </input> 
+						</operation>
+					  </sequence> 
+					</process>`,
+                description:
+                    "Criado via RestApi produtor " + nomeProdutor,
+
+                documentStorage: 1,
+                enableBusinessProcess: true,
+                queue: 6,
+                recoveryLevel: 3,
+                removalMethod: 1,
+                useBPQueuing: true,
+                lifespanHours: 2,
+                name: bpName
+            }
+        );
+		
+		
+		/* ====================================================
+           CRIAR SCHEDULE ( Agendador)
+           ==================================================== */
+
+        console.log("Criando Schedule... " + bpName);
+
+        await postApi(
+            "/schedules/",
+            {
+                bpNameValuePairs: [
+					{
+						append: false,
+						name: "maxCollect",
+						val: "10"
+					},
+					{
+						append: false,
+						name: "collectMultiple",
+						val: "true"
+					}
+					,
+					{
+						append: false,
+						name: "noFilesSetSuccess",
+						val: "true"
+					},
+					{
+						append: false,
+						name: "MBX_Produtor",
+						val: mailboxDestino
+					}
+				],
+
+                businessProcess: bpName,
+                dailySchedule: null,
+
+                dateExclusions: null,
+
+                monthlySchedule: null,
+
+                runAsUser: "admin",
+
+                runAtStartUp: false,
+
+                scheduleExclusions: null,
+
+                timerSchedule: {
+                    hours: 0,
+                    minutes: agendamento
+                },
+
+                weeklySchedule: null
+            }
+        );
+		
+}
+
+
+
+function criarNomeProdutor(nome, codIntegracao) {
+    return `${nome}_${codIntegracao}`;
+}
+
+function criarNomeConsumidor(nome, codIntegracao) {
+    return `${nome}_${codIntegracao}`;
+}
+
+/*
+      criarIntegracaoGeral
+*/
+async function criarIntegracaoGeral(tipoProduto, tipoConsumidor) {
+
+    try {
+	
+		const cdIntegracao = document.getElementById("cdIntegracao").textContent.trim();
+		
+		const chkAtivoZIP = document.getElementById("chkAtivoZIP").checked;		
+		
+        const produtor   = document.getElementById("produtor").value.trim();
+        const consumidor = document.getElementById("consumidor").value.trim();
+		
+		const nomeProdutor   = await criarNomeProdutor(produtor, cdIntegracao);
+		const nomeConsumidor = await criarNomeConsumidor(consumidor, cdIntegracao);
+       
+		//const templateNameTXT = "T_SIMPLES_INFRA";
+		let templateNameTXT = "T_SIMPLES_INFRA_PROTOCOLO";		
+		
+		if (document.getElementById("chkAtivoZIP").checked) {
+			templateNameTXT += "_ZIP";
+			console.log("Template: " + templateNameTXT)
+		}
+		
+        const agendamento = parseInt(document.getElementById("agendamento").value, 10 );
+		
+		
+        if (!produtor) {
+            mostrarNotificacao("aviso", "Informe o Produtor.");
+            return;
+        }
+
+        if (!consumidor) {
+            mostrarNotificacao("aviso", "Informe o Consumidor.");
+            return;
+        }
+
+        if (!origemNfs) {
+            mostrarNotificacao("aviso", "Informe a Origem NFS.");
+            return;
+        }
+
+        if (!destinoNfs) {
+            mostrarNotificacao("aviso", "Informe o Destino NFS.");
+            return;
+        }
+
+		if (tipoConsumidor == "AZURE") {			
+
+			const arquivo = document.getElementById("azureCACertificate").files[0];
+			if (!arquivo) {
+				throw new Error(
+					"Selecione o certificado CA do Azure."
+				);
+			}
+			
+			
+			const azureSecretKey = document.getElementById("azureSecretKey").value.trim();
+			if (!azureSecretKey) {
+				throw new Error(
+					"Informe o azureSecretKey do Azure."
+				);
+			}		
+			
+		}		
+		
+		
+		
+
+	
+		/* ====================================================
+			CRIANDO INTEGRACAO INICIO
+		   ==================================================== */
+		
+        await criarProdutor(tipoProduto, nomeProdutor);		 
+		
+		
+		/* ====================================================
+			CRIAR CONSUMIDOR
+		   ==================================================== */
+		let customProtocolExtensions = "";
+		 
+		switch (tipoConsumidor) {
+			case "NFS":
+				console.log("Tipo NFS");
+				
+				const destinoNfs = await obterDestinoSelecionado().trim();
+				
+				customProtocolExtensions =
+						"host_AFTRouteViaExtractFSA_EMAIL_SUCESSO:YES," +
+						"host_AFTRouteViaExtractFSA_EMAIL_ERRO:NO," +
+						"host_AFTRouteViaExtractFSA_PREFIX_LOG:SIXPT_CUSTOM," +
+						"PROTOCOLBPNAME:host_AFTRouteViaExtractFSA," +
+						"host_AFTRouteViaExtractFSA_LOG_DEFAULT:YES," +
+						"host_AFTRouteViaExtractFSA_PATH_EXTRACT_FSA:" + destinoNfs + "," +
+						"host_AFTRouteViaExtractFSA_IDFLOW:ID-host-XXXX," +
+						"host_AFTRouteViaExtractFSA_LISTA_EMAIL:xpto@mail.com," +
+						"host_AFTRouteViaExtractFSA_LOG_CUSTOM:YES," +
+						"host_AFTRouteViaExtractFSA_PATH_CUSTOM:/NFS/LAB/SFG/FLUXOS/SIXPT/LogCustom,";
+						
+				await criarConsumidor(tipoConsumidor, nomeConsumidor, "host-fsa-extract-protocol", customProtocolExtensions);
+				
+				break;
+
+			case "BROWSER":
+				console.log("Tipo BROWSER");
+				await criarConsumidor(tipoConsumidor, nomeConsumidor, null, null);
+				
+				break;
+
+			case "AZURE":
+			
+				console.log("Tipo AZURE");
+				const azureBucket = document.getElementById("azureBucket").value.trim();
+				
+				let azureBucketPastaDestino = document.getElementById("azureBucketPasta").value.trim();
+							
+				const azureBucketPastaDestinoSemBarra = "/" + azureBucketPastaDestino.replace(/\\/g, "/").replace(/^\/+/, "");
+
+				const azureURL = document.getElementById("azureURL").value.trim();			
+				const azureHostTratado = azureURL.replace(/^https?:\/\//i, "").replace(/\/$/, "");
+			
+				const azureServicoGroup = "CEF_" + azureHostTratado + "_" + nomeConsumidor+"_GRP";
+				const azureServicoObscure = "CEF_Azure_Obscure_" + nomeConsumidor;
+				
+				
+				customProtocolExtensions =
+					"host_FG_Route_Azure_Objectstorebucketname:" + azureBucket +
+					",host_FG_Route_Azure_Objectstorediretorioentrada:" + azureBucketPastaDestinoSemBarra +
+					",PROTOCOLBPNAME:host_FG_Route_Azure" +
+					",host_FG_Route_Azure_Objectstoreobscurename:" + azureServicoObscure +
+					",host_FG_Route_Azure_Objectstoreclientadapter:" + azureServicoGroup + ",";
+					
+				await criarConsumidor(tipoConsumidor, nomeConsumidor, "host-azure-protocol", customProtocolExtensions);
+				
+				const certNameParam = nomeConsumidor+"_"+azureHostTratado;
+
+				const arquivo = document.getElementById("azureCACertificate").files[0];
+				const conteudoBase64Param = await converterArquivoParaBase64(arquivo);				
+				
+				await criarServicoCACertificateAzure(certNameParam, conteudoBase64Param);		
+
+				const azureSecretKey = document.getElementById("azureSecretKey").value.trim();
+
+				await criarServicoObscureParameterAzure(nomeConsumidor ,azureSecretKey, azureServicoObscure);
+				
+				await criarServicoAzure(nomeConsumidor, azureServicoGroup, azureURL, certNameParam, azureBucket);				
+				
+				break;
+				
+			case "CD":
+				// ação para TXT
+				break;	
+
+			default:
+				// padrão
+		}
+		
+		
+		/* ====================================================
+			CRIAR CANAL
+		   ==================================================== */
+		console.log("Criando Canal... para Produtor:" + nomeProdutor + " Cons:" + nomeConsumidor + " TEMPLATE:" + templateNameTXT);
+		await postApi(
+			"/routingchannels/",
+			{
+				consumer: nomeConsumidor,
+
+				producer: nomeProdutor,
+
+				provisioningFacts: [
+					{
+						provFactName: "myProdutorProtocolo",
+						provFactValue: tipoProduto
+					},
+					{
+						provFactName: "myConsumidorProtocolo",
+						provFactValue: tipoConsumidor
+					}
+				],
+				templateName: templateNameTXT
+			}
+		);
+		
+		
+		
+		/*  ====================================================
+            Criar Servico B2Bi Para Produtor
+           ==================================================== */		   
+		switch (tipoProduto) {
+			case "NFS":
+				console.log("Produtor Tipo NFS");
+				
+				 const origemNfs = await obterOrigemSelecionada().trim();
+				
+				/*  ====================================================
+				   Obter Mailbox do Canal 
+				*/
+				const mailboxPath = await obterProducerMailboxPath(
+						encodeURIComponent(nomeProdutor), 
+						encodeURIComponent(nomeConsumidor), 
+						templateNameTXT
+					);
+				console.log("Mailbox: ${mailboxPath}");
+				
+				
+				
+ 			    await criarComponentesProdutor_NFS(nomeProdutor, agendamento, origemNfs, mailboxPath);
+				
+				break;
+
+			case "AZURE":
+			
+			
+					const azureBucket = document.getElementById("prod-azureBucket").value.trim();
+	
+					const azureURL = document.getElementById("prod-azureURL").value.trim();			
+					const azureHostTratado = azureURL.replace(/^https?:\/\//i, "").replace(/\/$/, "");
+				
+					const azureServicoGroup = "CEF_" + azureHostTratado + "_" + nomeProdutor+"_GRP";
+					const azureServicoObscure = "CEF_Azure_Obscure_" + nomeProdutor;
+	
+					const certNameParam = nomeProdutor+"_"+azureHostTratado;
+
+					const arquivo = document.getElementById("prod-azureCACertificate").files[0];
+					const conteudoBase64Param = await converterArquivoParaBase64(arquivo);				
+					
+					await criarServicoCACertificateAzure(certNameParam, conteudoBase64Param);		
+
+					const azureSecretKey = document.getElementById("prod-azureSecretKey").value.trim();
+
+					await criarServicoObscureParameterAzure(nomeProdutor, azureSecretKey, azureServicoObscure);								
+					await criarServicoAzure(nomeProdutor, azureServicoGroup, azureURL, certNameParam, azureBucket);	
+		            
+					
+					let mailboxPathProdutor = await obterProducerMailboxPath(
+							encodeURIComponent(nomeProdutor), 
+							encodeURIComponent(nomeConsumidor), 
+							templateNameTXT
+						);
+					console.log("Mailbox: ${mailboxPathProdutor}");
+							
+					const agendamentoParam =
+						parseInt(document.getElementById("prod-azure-agendamento").value, 10);
+							
+							
+					const prod_azure_pastaarquivado =
+						document.getElementById("prod-azure-pastaarquivado")
+							.value.trim();
+
+					const prod_azure_pastaorigem =
+						document.getElementById("prod-azure-pastaorigem")
+							.value.trim();
+							
+							
+					// Produtor Coletor
+					await criarColetorAzureServicos(nomeProdutor, agendamentoParam, mailboxPathProdutor, 
+					prod_azure_pastaorigem, prod_azure_pastaarquivado, azureServicoGroup, azureServicoObscure);		
+				
+				break;
+
+			case "TXT":
+				// ação para TXT
+				break;
+
+			default:
+				// padrão
+		}
+		
+		
+		const botao = document.getElementById("btnIntegrar");				
+		botao.textContent = 'Criar Integração';
+		
+        mostrarNotificacao("sucesso", "Integração criada com sucesso!");
+
+    }
+    catch (e) {
+        console.error(e);
+
+        mostrarNotificacao("erro", "Erro ao criar integração: " + e.message);
+    }
+}
+
+async function postApi(endpoint, payload) {
+
+    const response = await fetch(
+        "https://fgw.des.cluster1.node1.host:5076/B2BAPIs/svc" + endpoint,
+        {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Authorization":
+                    "Basic " + btoa("infrafacil:123456")
+            },
+            body: JSON.stringify(payload)
+        }
+    );
+
+    let retorno = {};
+
+    try {
+        retorno = await response.json();
+    } catch (e) {
+        // ignora retorno sem JSON
+    }
+
+    if (!response.ok) {
+
+        const descricao =
+            retorno.errorDescription || "";
+
+        /*
+         * Já existe Trading Partner/Mailbox
+         */
+        if (
+            descricao.includes("API000429") ||
+			descricao.includes("API000232")
+        ) {
+
+            console.log(
+                "Parceiro já existe. Continuando processamento..."
+            );
+
+            return {
+                warning: true,
+                alreadyExists: true,
+                data: retorno
+            };
+        }
+
+        /*
+         * Demais erros são impeditivos
+         */
+        throw new Error(
+            endpoint +
+            " => HTTP " +
+            response.status +
+            " - " +
+            descricao
+        );
+    }
+
+    return retorno;
+}
+
+function ok(el,msg){
+
+    el.innerHTML =
+        SVG_OK +
+        '<span class="ok">'+msg+'</span>';
+}
+
+function erro(el,msg){
+
+    el.innerHTML =
+        SVG_ERRO +
+        '<span class="erro">'+msg+'</span>';
+}
+
+async function consultarTradingPartner(nome){
+
+    const url =
+    "https://fgw.des.cluster1.node1.host:5076/B2BAPIs/svc/tradingpartners/"
+    + encodeURIComponent(nome);
+
+    const response = await fetch(url,{
+        method:"GET",
+        headers:{
+            "Accept":"application/json",
+            "Content-Type":"application/json",
+            "Authorization":"Basic " +
+                btoa("infrafacil:123456")
+        }
+    });
+
+    if(response.status === 404){
+        return false;
+    }
+
+    if(!response.ok){
+        throw new Error(response.status);
+    }
+
+    return true;
+}
+
+
+async function obterProducerMailboxPath(producer, consumer, template) {
+    const url =
+        "https://fgw.des.cluster1.node1.host:5076/B2BAPIs/svc/routingchannels/" +
+        "?_range=0-999" +
+        "&searchByConsumer=" + encodeURIComponent(consumer)+
+        "&searchByTemplate=" + encodeURIComponent(template) +
+        "&searchByProducer=" + encodeURIComponent(producer);
+
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": "Basic " +
+                btoa("infrafacil:123456")
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error(`Erro HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!data || data.length === 0) {
+        return null;
+    }
+    return data[0].producerMailboxPath;
+}
+
+async function validarProdutor(){
+
+    const nome =
+        document.getElementById("produtor").value.trim();
+
+    const resultado =
+        document.getElementById("resultadoProdutor");
+
+    if(!nome){
+        erro(resultado,"Informe o produtor");
+        return;
+    }
+
+    try{
+
+        const existe =
+            await consultarTradingPartner(nome);
+
+        if(existe){
+            erro(resultado,"Já existe");
+        }else{
+            ok(resultado,"Disponível");
+        }
+
+    }catch(e){
+
+        erro(resultado,"Erro");
+        console.error(e);
+    }
+}
+
+async function validarConsumidor(){
+
+    const nome =
+        document.getElementById("consumidor").value.trim();
+
+    const resultado =
+        document.getElementById("resultadoConsumidor");
+
+    if(!nome){
+        erro(resultado,"Informe o consumidor");
+        return;
+    }
+
+    try{
+
+        const existe =
+            await consultarTradingPartner(nome);
+
+        if(existe){
+            erro(resultado,"Já existe");
+        }else{
+            ok(resultado,"Disponível");
+        }
+
+    }catch(e){
+
+        erro(resultado,"Erro");
+        console.error(e);
+    }
+}
+
+function validarOrigem(){
+
+    const path =
+        document.getElementById("origemNfs").value.trim();
+
+    const resultado =
+        document.getElementById("resultadoOrigem");
+
+    if(path){
+        ok(resultado,"Path informado");
+    }else{
+        erro(resultado,"Path vazio");
+    }
+}
+
+function validarDestino(){
+
+    const path =
+        document.getElementById("destinoNfs").value.trim();
+
+    const resultado =
+        document.getElementById("resultadoDestino");
+
+    if(path){
+        ok(resultado,"Path informado");
+    }else{
+        erro(resultado,"Path vazio");
+    }
+}
+
+
+
+let tipoOrigem = "NFS";
+
+function openTab(tabName){
+
+    document.querySelectorAll(".tab")
+        .forEach(t => t.classList.remove("active"));
+
+    document.querySelectorAll(".tab-content")
+        .forEach(t => t.classList.remove("active"));
+
+    document.getElementById(tabName)
+        .classList.add("active");
+
+    document.getElementById("btn-" + tabName)
+        .classList.add("active");
+
+    tipoOrigem = tabName.toUpperCase();
+}
+
+
+let tipoDestino = "NFS";
+
+function openConsumidorTab(tabName){
+
+    document
+        .querySelectorAll(".tab-content-cons")
+        .forEach(tab =>
+            tab.classList.remove("active"));
+
+    document
+        .querySelectorAll(
+            "#btn-cons-nfs,#btn-cons-browser,#btn-cons-sftp,#btn-cons-cd,#btn-cons-azure"
+        )
+        .forEach(tab =>
+            tab.classList.remove("active"));
+
+    document
+        .getElementById(tabName)
+        .classList.add("active");
+
+    document
+        .getElementById("btn-" + tabName)
+        .classList.add("active");
+
+    tipoDestino =
+        tabName
+            .replace("cons-","")
+            .toUpperCase();
+}
+
+
+function obterDestinoSelecionado(){
+
+    switch(tipoDestino){
+
+        case "NFS":
+            return document.getElementById("destinoNfs").value;
+
+        case "BROWSER":
+            return document.getElementById("destinoBrowser").value;
+
+        case "SFTP":
+            return document.getElementById("destinoSftp").value;
+
+        case "CD":
+            return document.getElementById("destinoCd").value;
+			
+		case "AZURE":
+            return document.getElementById("destinoAzure").value;	
+
+        default:
+            return "";
+    }
+}
+
+
+function atualizarCredenciaisProdutor(){
+
+    const produtor =
+        document.getElementById("produtor").value.trim();
+
+    const valor =
+        produtor || "<NomeProdutor>";
+
+    if(document.getElementById("browserLogin")){
+        document.getElementById("browserLogin").innerText = valor;
+    }
+
+    if(document.getElementById("sftpLogin")){
+        document.getElementById("sftpLogin").innerText = valor;
+    }
+
+    if(document.getElementById("cdDns")){
+        document.getElementById("cdDns").innerText =
+            "/" + valor + "/CD/Envio";
+    }
+}
+
+
+function atualizarCredenciaisConsumidor(){
+
+    const consumidor =
+        document.getElementById("consumidor").value.trim();
+
+    const valor =
+        consumidor || "<NomeConsumidor>";
+
+    if(document.getElementById("browserLoginConsumidor")){
+        document.getElementById("browserLoginConsumidor").innerText = valor;
+    }
+
+}
+
+
+async function sha256(texto) {
+
+    const encoder = new TextEncoder();
+    const data = encoder.encode(texto);
+
+    const hashBuffer =
+        await crypto.subtle.digest("SHA-256", data);
+
+    return Array
+        .from(new Uint8Array(hashBuffer))
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("");
+}
+
+function randomLetters(length = 5) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let result = '';
+
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    return result;
+}
+
+//console.log(randomLetters()); // Ex: KXQTR
+document.getElementById('cdIntegracao').textContent = randomLetters();
+
+
+function mostrarLoading(texto = "Carregando...") {
+
+    document.getElementById("loadingModal").style.display = "flex";
+
+    document.querySelector(".loading-text").innerText = texto;
+
+    document.body.style.cursor = "wait";
+}
+
+function ocultarLoading() {
+
+    document.getElementById("loadingModal").style.display = "none";
+
+    document.body.style.cursor = "default";
+}
+
+function mostrarNotificacao(tipo, mensagem) {
+    const cfg = {
+        sucesso: { icon: "✅", titulo: "Sucesso",    cor: "#16a34a" },
+        erro:    { icon: "❌", titulo: "Erro",       cor: "#dc2626" },
+        aviso:   { icon: "⚠️", titulo: "Atenção",   cor: "#d97706" },
+        info:    { icon: "ℹ️", titulo: "Informação", cor: "#005CA9" },
+    };
+    const c = cfg[tipo] || cfg.info;
+    document.getElementById("notif-icon").textContent   = c.icon;
+    document.getElementById("notif-titulo").textContent = c.titulo;
+    document.getElementById("notif-titulo").style.color = c.cor;
+    document.getElementById("notif-body").textContent   = mensagem;
+    document.getElementById("notif-header").style.borderBottomColor = c.cor + "33";
+    document.getElementById("notif-btn").style.background = c.cor;
+    document.getElementById("notif-overlay").classList.add("show");
+}
+
+function fecharNotificacao() {
+    document.getElementById("notif-overlay").classList.remove("show");
+}
+
+</script>
+
+</div>
+
+<footer>
+    Powered by <span>IBM BOB</span>
+</footer>
+
+</body>
+</html>

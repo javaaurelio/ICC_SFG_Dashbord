@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "https://www.eclipse.org/jetty/configure_10_0.dtd">
+<!-- ==================================================================
+Configure and deploy the test web application in $(jetty.home)/webapps/test
+
+Note. If this file did not exist or used a context path other that /test
+then the default configuration of jetty.xml would discover the test
+webapplication with a WebAppDeployer.  By specifying a context in this
+directory, additional configuration may be specified and hot deployments
+detected.
+===================================================================== -->
+<Configure id="infra-icc-app" class="org.eclipse.jetty.ee10.webapp.WebAppContext">
+	<Set name="contextPath">/infra-icc</Set>
+	<Set name="war"><SystemProperty name="jetty.base" default="."/>/webapps/infra-icc.war</Set>
+	 <!-- <Set name="defaultsDescriptor"><SystemProperty name="jetty.base" default="."/>/overrides/webdefault.xml</Set> -->
+		<Call name="setAttribute">
+			<Arg>org.eclipse.jetty.server.webapp.WebInfIncludeJarPattern</Arg>
+			<Arg>.\Z</Arg>
+		</Call>
+	
+
+
+	<Set name="extraClasspath">../../lib/10x_Jars/ccwc-6.1.jar,../../lib/sterling/AdminMain.jar,../../lib/sterling/CCHelp.jar,../../lib/sterling/CDJAI.jar,../../lib/sterling/CXJAI.jar,../../lib/sterling/IALicense.jar,../../lib/sterling/SCCI18N.jar,../../lib/sterling/SCCenter.jar,../../lib/interfaces/ccjasper.jar,../../lib/sterling/ccicons.jar,../../lib/sterling/com.ibm.profiler.core-1.5.0.1.jar,../../lib/sterling/com.ibm.profiler.jdbc-1.4.0.1.jar,../../lib/sterling/componentCommon.jar,../../lib/sterling/hadrian-client.jar,../../lib/sterling/hadrian-common.jar,../../lib/sterling/persistence.jar,../../lib/sterling/ruleEngine.jar,../../lib/sterling/security-SNAPSHOT.jar,../../lib/sterling/slcComponent.jar,../../lib/thirdparty/TableLayout.jar,../../lib/thirdparty/US_export_policy.jar,../../lib/thirdparty/ant.jar,../../lib/thirdparty/castor-core-1.4.1.jar,../../lib/thirdparty/castor-xml-1.4.1.jar,../../lib/thirdparty/commons-beanutils-1.11.0.jar,../../lib/thirdparty/commons-beanutils2-2.0.0-M2.jar,../../lib/thirdparty/commons-configuration2-2.15.0.jar,../../lib/thirdparty/commons-lang3-3.20.0.jar,../../lib/thirdparty/commons-logging-1.3.6.jar,../../lib/thirdparty/commons-text-1.15.0.jar,../../lib/thirdparty/concurrent.jar,../../lib/thirdparty/hamcrest-3.0.jar,../../lib/thirdparty/httpclient-4.5.13.jar,../../lib/thirdparty/httpcore-4.4.13.jar,../../lib/thirdparty/javax.mail.jar,../../lib/thirdparty/jaxen-1.1.6.jar,../../lib/thirdparty/jdmkrt.jar,../../lib/thirdparty/jdmktk.jar,../../lib/thirdparty/jdom-2.0.6.1.jar,../../lib/thirdparty/jetty-util-12.0.34.jar,../../lib/thirdparty/jmxremote_optional.jar,../../lib/thirdparty/jnlp-servlet.jar,../../lib/thirdparty/jt400.jar,../../lib/thirdparty/local_policy.jar,../../lib/thirdparty/log4j-1.2-api-2.25.4.jar,../../lib/thirdparty/log4j-iostreams-2.25.4.jar,../../lib/thirdparty/pdfbox-app-2.0.36.jar,../../lib/thirdparty/quartz-2.5.0.jar,../../lib/thirdparty/serializer.jar,../../lib/thirdparty/slf4j-api-1.7.25.jar,../../lib/thirdparty/snmp.cs.drexel.edu.jar,../../lib/thirdparty/velocity-engine-core-2.4.1.jar,../../lib/thirdparty/velocity-dvsl-0.45.jar,../../lib/thirdparty/xalan.jar,../../lib/thirdparty/xercesImpl.jar,../../lib/IBM_MQ_Jars/com.ibm.mq.allclient.jar,../../lib/IBM_MQ_Jars/jms.jar,../../lib/ActiveMQ_Jars/activemq-all-5.19.7.jar,../../lib/Cognos_Jars/SCC_UDF.jar,../../lib/10x_Jars/ccwc-6.1.jar,../../lib/10x_Jars/10x-app-3.9.0.jar,../../lib/10x_Jars/10x-app-db-3.9.0.jar,../../lib/10x_Jars/10x-app-db-openjpa-3.9.0.jar,../../lib/10x_Jars/10x-core-3.9.0.jar,../../lib/10x_Jars/10x-pac-change-history-3.9.0.jar,../../lib/10x_Jars/10x-pac-user-mgt-3.9.0.jar,../../lib/10x_Jars/10x-ui-3.9.0.jar,../../lib/10x_Jars/10x-ws-3.9.0.jar,../../lib/10x_Jars/10x-ws-client-3.9.0.jar,../../lib/10x_Jars/ccwc-6.1.jar,../../lib/10x_Jars/commons-codec-1.14.jar,../../lib/10x_Jars/commons-collections4-4.5.0.jar,../../lib/10x_Jars/jackson-annotations-2.18.6.jar,../../lib/10x_Jars/jackson-core-2.18.6.jar,../../lib/10x_Jars/commons-fileupload-1.6.0.jar,../../lib/10x_Jars/commons-io-2.22.0.jar,../../lib/10x_Jars/event-publisher-sdk-3.0.2.jar,../../lib/10x_Jars/gson-2.10.1.jar,../../lib/10x_Jars/icu4j-67_1.jar,../../lib/10x_Jars/log4j-api-2.25.4.jar,../../lib/10x_Jars/log4j-core-2.25.4.jar,../../lib/10x_Jars/log4j-web-2.25.4.jar,../../lib/10x_Jars/openjpa-all-3.2.2.jar,../../lib/10x_Jars/saas-core-1.8.0.jar,../../lib/10x_Jars/saas-db-1.8.0.jar,../../lib/10x_Jars/saas-file-1.3.0.jar,../../lib/10x_Jars/saas-log-1.3.0.jar,../../lib/10x_Jars/saas-log-adapter-1.2.0.jar,../../lib/10x_Jars/saas-mail-1.1.1.jar,../../lib/Jasper_Jars/jasperreports-xalan-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-annotation-processors-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-ant-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-barbecue-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-barcode4j-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-castor-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-chart-customizers-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-charts-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-chart-themes-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-data-adapters-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-data-adapters-http-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-ejbql-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-ejbql-j2ee-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-excel-poi-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-fastexcel-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-fonts-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-functions-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-groovy-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-hibernate-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-hibernate-j2ee-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-javaflow-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-javascript-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-jaxen-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-jdt-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-json-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-metadata-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-olap-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-pdf-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-servlets-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-servlets-j2ee-7.0.7.jar,../../lib/Jasper_Jars/jasperreports-spring-7.0.7.jar,../../lib/Jasper_Lib_Jars/batik-anim-1.19.jar,../../lib/Jasper_Lib_Jars/batik-awt-util-1.19.jar,../../lib/Jasper_Lib_Jars/batik-bridge-1.19.jar,../../lib/Jasper_Lib_Jars/batik-gvt-1.19.jar,../../lib/Jasper_Lib_Jars/batik-parser-1.19.jar,../../lib/Jasper_Lib_Jars/batik-svg-dom-1.19.jar,../../lib/Jasper_Lib_Jars/batik-util-1.19.jar,../../lib/Jasper_Lib_Jars/commons-javaflow-r306555.jar,../../lib/Jasper_Lib_Jars/jackson-dataformat-xml-2.18.6.jar,../../lib/Jasper_Lib_Jars/cdt-java-client-4.0.0.jar,../../lib/Jasper_Lib_Jars/commons-digester-2.1.jar,../../lib/Jasper_Lib_Jars/ecj-3.35.0.jar,../../lib/Jasper_Lib_Jars/jaxen-2.0.0.jar,../../lib/Jasper_Lib_Jars/jcommon-1.0.24.jar,../../lib/Jasper_Lib_Jars/jfreechart-1.5.5.jar,../../lib/Jasper_Lib_Jars/joda-time-2.12.7.jar,../../lib/Jasper_Lib_Jars/openpdf-1.3.43.jar,../../lib/Jasper_Lib_Jars/poi-5.3.0.jar,../../lib/Jasper_Lib_Jars/rhino-1.7.15.1.jar,../../lib/Jasper_Lib_Jars/spring-beans-6.2.19.jar,../../lib/Jasper_Lib_Jars/spring-core-6.2.19.jar,../../lib/Jasper_Lib_Jars/stax2-api-4.2.2.jar,../../lib/Jasper_Lib_Jars/xml-apis-ext-1.3.04.jar</Set>
+
+  
+  <!-- CC-3890 OWASP low risk defect resolution-->
+  <Get name="sessionHandler">
+  <Set name="httpOnly" type="boolean">true</Set>
+  </Get>
+  
+  <!--MFT-11749 Disable stacktrace to hide inbuild web server details-->
+  <Get name="errorHandler">
+    <Call name="setShowStacks">
+      <Arg type="boolean">false</Arg>  
+    </Call>
+  </Get>
+  
+  <Call name="insertHandler">
+    <Arg>
+      <New id="RequestLog" class="org.eclipse.jetty.server.Server">
+        <Set name="requestLog">
+          <New id="RequestLogImpl" class="org.eclipse.jetty.server.CustomRequestLog">
+            <Arg>
+			<New class="org.eclipse.jetty.server.AsyncRequestLogWriter">
+			  <Arg>
+				<Call name="resolvePath" class="org.eclipse.jetty.xml.XmlConfiguration">
+				  <Arg><Property name="jetty.base"/></Arg>
+				  <Arg>
+					<Property name="jetty.requestlog.filePath">
+					  <Default>
+						<Property name="jetty.requestlog.dir" default="logs"/>/infra-icc-yyyy_mm_dd.request.log
+					  </Default>
+					</Property>
+				  </Arg>
+				</Call>
+			  </Arg>
+
+			  <Set name="filenameDateFormat"><Property name="jetty.requestlog.filenameDateFormat" default="yyyy_MM_dd"/></Set>
+			  <Set name="timeZone"><SystemProperty name="log.timezone"/></Set>
+			  <Set name="retainDays"><Property name="jetty.requestlog.retainDays" default="1"/></Set>
+			  <Set name="append"><Property name="jetty.requestlog.append" default="true"/></Set>
+			</New>
+		  </Arg>
+
+		  <!-- Format String -->
+		  <Arg>
+			<Property name="jetty.requestlog.formatString" deprecated="jetty.customrequestlog.formatString">
+			  <Default>
+				<Get class="org.eclipse.jetty.server.CustomRequestLog" name="EXTENDED_NCSA_FORMAT"/>
+			  </Default>
+			</Property>
+		  </Arg>
+          </New>
+        </Set>
+      </New>
+    </Arg>
+  </Call> 
+  
+</Configure>

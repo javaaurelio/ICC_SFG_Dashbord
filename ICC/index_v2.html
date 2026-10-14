@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>B2B Dashboard</title>
+
+<style>
+body { font-family: Arial; margin:0; background:#e9ecef; }
+
+/* ===== LOGIN ===== */
+.login-container {
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.login-card {
+  width:320px;
+  padding:30px;
+  background:white;
+  border-radius:10px;
+  box-shadow:0 6px 25px rgba(0,0,0,0.2);
+}
+
+.login-header {
+  text-align:center;
+  margin-bottom:20px;
+}
+
+.login-header h3 { margin:0; }
+.login-header p { font-size:12px; color:#666; }
+
+.form-group { margin-bottom:12px; }
+.form-group input {
+  width:100%;
+  padding:8px;
+  border-radius:5px;
+  border:1px solid #ccc;
+}
+
+.btn-login {
+  width:120px;
+  margin:10px auto 0;
+  display:block;
+  padding:8px;
+  background:#005CA9;
+  color:white;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.error {
+  text-align:center;
+  color:red;
+  font-size:12px;
+  display:none;
+}
+
+/* HEADER */
+.header {
+  background:#005CA9;
+  color:white;
+  padding:10px;
+  display:flex;
+  justify-content:space-between;
+}
+
+.btn-logout {
+  background:white;
+  color:#005CA9;
+  border:none;
+  padding:5px 10px;
+  border-radius:5px;
+}
+
+/* CARDS */
+.cards {
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  padding:12px;
+}
+
+.card {
+  width:260px;
+  padding:12px;
+  border-radius:10px;
+  cursor:pointer;
+  transition:.25s;
+}
+
+.card:hover { transform:scale(1.05); }
+
+.selected { border:3px solid black; }
+
+.ready { background:#e6f7ec; }
+.other { background:#fdecea; }
+
+.card-title { font-size:16px; font-weight:bold; }
+.card-small { font-size:11px; }
+
+.alert-high { color:#e74c3c; font-weight:bold; }
+.alert-medium { color:#f1c40f; font-weight:bold; }
+
+/* TABS */
+.tabs { display:flex; gap:10px; padding:10px; }
+
+.tab {
+  padding:6px 10px;
+  background:#ddd;
+  cursor:pointer;
+}
+
+.tab.active { background:#005CA9; color:white; }
+
+/* FILTER */
+.btn-filter {
+  padding:5px;
+  margin:3px;
+  background:#bdc3c7;
+}
+
+.active-filter {
+  background:#3498db;
+  color:white;
+}
+
+/* TABLE */
+table { width:100%; border-collapse:collapse; }
+
+th,td {
+  padding:6px;
+  border:1px solid #ddd;
+  font-size:12px;
+}
+
+th { background:#34495e; color:white; }
+
+/* STATUS */
+.dot {
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  display:inline-block;
+}
+
+.green { background:#2ecc71; }
+.red { background:#e74c3c; }
+
+/* PAGINAÇO */
+.pagination {
+  text-align:center;
+  margin:10px;
+}
+
+/* FOOTER */
+.footer {
+  
+  bottom:0;
+  width:100%;
+  background:#2c3e50;
+  color:white;
+  text-align:center;
+  padding:6px;
+}
+
+.menu{
+    display:flex;
+    background:#f4f4f4;
+    border-bottom:1px solid #ccc;
+}
+
+.menu-item{
+    padding:12px 20px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.menu-item.active{
+    background:#005CA9;
+    color:white;
+}
+
+.status-cell {
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.subtable {
+    width: 100%;
+    margin-top: 5px;
+    border-collapse: collapse;
+}
+
+.subtable th,
+.subtable td {
+    border: 1px solid #ddd;
+    padding: 4px;
+}
+
+tr[onclick] {
+    cursor: pointer;
+}
+
+
+
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="loginPage" class="login-container">
+  <div class="login-card">
+
+    <div class="login-header">
+      <h3>host</h3>
+      <p>IBM Sterling Control Center</p>
+    </div>
+
+    <div class="form-group">
+      <label>Login</label>
+      <input id="user">
+    </div>
+
+    <div class="form-group">
+      <label>Senha</label>
+      <input id="password" type="password">
+    </div>
+
+    <div id="loginError" class="error">
+      Usuáo ou senha invádos
+    </div>
+
+    <button class="btn-login" onclick="login()">Entrar</button>
+
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+
+<div class="header">
+<div>B2B Dashboard</div>
+<div>
+Usuáo: <b id="userName"></b>
+<button class="btn-logout" onclick="logout()">Sair</button>
+</div>
+</div>
+
+<div class="cards" id="cards"></div>
+
+<div class="menu">
+    <div class="menu-item active" onclick="openMenu('home',this)">Home</div>
+    <div class="menu-item" onclick="openMenu('transferencia',this)">Transferência de Arquivos</div>
+	<div class="menu-item" onclick="openMenu('localizarArquivo',this)">Localizar arquivos</div>
+</div>
+
+
+<div id="homePage">
+
+		<!-- ADAPTERS -->
+
+		<div id="adaptersTab">
+
+		<input id="search" placeholder="Buscar..." onkeyup="renderAdapters()">
+
+		<div>
+		<button class="btn-filter active-filter" onclick="setFilter('ALL',this)">Todos</button>
+		<button class="btn-filter" onclick="setFilter('ACTIVE',this)">Ativos</button>
+		<button class="btn-filter" onclick="setFilter('DOWN',this)">Inativos</button>
+		</div>
+
+		<table>
+		<thead>
+		<tr>
+		<th>Display</th>
+		<th>Name</th>
+		<th>Tipo</th>
+		<th>Status</th>
+		</tr>
+		</thead>
+		<tbody id="adaptersTable"></tbody>
+		</table>
+		</div>
+
+		<!-- FILES -->
+		<div id="filesTab" style="display:none">
+
+		<input id="fileFilter" placeholder="Digite 4+ caracteres">
+
+		<div id="filesTotal" style="margin:10px;font-weight:bold"></div>
+
+		<table>
+		<thead>
+		<tr>
+		<th>Arquivo</th>
+		<th>ProcName</th>
+		<th>Tamanho</th>
+		<th>Status</th>
+		<th>Data</th>
+		</tr>
+		</thead>
+		<tbody id="filesTable"></tbody>
+		</table>
+
+		<div class="pagination">
+		<div id="pageInfo"></div>
+		<button onclick="prevPage()">Anterior</button>
+		<button onclick="nextPage()">Próo</button>
+		</div>
+
+		</div>
+
+</div>
+
+<div id="transferenciaPage" style="display:none;padding:15px">
+
+    <div style="margin-bottom:15px">
+        <label><b>Código da Integração</b></label><br>
+        <input
+            type="text"
+            id="codigoIntegracao"
+            style="width:300px;padding:8px"
+            placeholder="Informe o código da integração">
+		
+        <button
+            class="btn-login"
+            style="display:inline-block;margin-left:10px"
+            onclick="pesquisarHoje()">Hoje</button>
+
+
+		<button onclick="moverPeriodo(-1)">◀</button>
+
+		<span id="periodoSelecionado"></span>
+
+		<button onclick="moverPeriodo(1)">▶</button>
+
+		
+    </div>
+
+    <div id="eventosTotal"></div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 120px;">Status</th>
+                <th>ID Execucao</th>
+				<th>Nome Fluxo</th>                                            
+                <th>Duracao</th>                
+                <th>Data/Hora</th>
+				
+				<th>Msg / Arquivos Capturados</th>    
+            </tr>
+        </thead>
+        <tbody id="eventosTable"></tbody>
+    </table>
+	
+	<button id="btnAnterior" onclick="paginaAnterior()">
+    Anterior
+	</button>
+
+	<button id="btnProxima" onclick="proximaPagina()">
+		Próxima
+	</button>
+
+	<span id="lblPagina"></span>
+
+</div>
+
+<div id="localizarArquivoPage" style="display:none;padding:15px">
+
+    <h3>Localizar Arquivo</h3>
+
+    <div style="margin-bottom:10px">
+        <label><b>Código da Integração</b></label><br>
+        <input
+            type="text"
+            id="codigoLocalizacao"
+            style="width:250px;padding:8px">
+    </div>
+
+    <div style="margin-bottom:10px">
+        <label><b>Nome do Arquivo</b></label><br>
+        <input
+            type="text"
+            id="nomeArquivo"
+            style="width:400px;padding:8px">
+    </div>
+
+    <button
+        class="btn-login"
+        style="display:inline"
+        onclick="obterArquivosCapturados()">
+
+        Pesquisar
+    </button>
+
+    <div id="resultadoArquivo" style="margin-top:20px"></div> 
+
+</div>
+
+<div class="footer">IBM Sterling Control Center</div>
+</div>
+
+<script>
+
+const baseUrl = window.location.origin;
+
+let token="";
+let serverAtual="";
+let selectedCard=null;
+let adapters=[];
+let filter="ALL";
+
+let filePage=1;
+let totalRows=0;
+let limit=10;
+
+/* LOGIN */
+async function login(){
+
+  let res = await apiFetch(`${baseUrl}/api/auth/login`,{
+    method:"POST",
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      userId:user.value,
+      password:password.value
+    })
+  });
+
+  let data = await res.json();
+
+  if(!data.data){
+    loginError.style.display="block";
+    return;
+  }
+
+  token=data.data.bearerString;
+  userName.innerText=data.data.userName;
+
+  loginPage.style.display="none";
+  app.style.display="block";
+
+  loadServers();
+}
+
+/* SERVERS */
+async function loadServers(){
+
+  let res = await apiFetch(`${baseUrl}/api/v1/server/servers/search`,{
+    method:"POST",
+    headers:{
+      'Content-Type':'application/json',
+      'CC_Authorization':token
+    },
+    body:JSON.stringify({
+      limit:10,
+      showAllColumns:true
+    })
+  });
+
+  let data = await res.json();
+
+  cards.innerHTML="";
+
+  data.data.forEach(s=>{
+
+    let card=document.createElement("div");
+    card.className="card "+(s.statusCode==="READY"?"ready":"other");
+
+    card.innerHTML=`
+      <div class="card-title">${s.name}</div>
+      <div class="card-small">${s.hostName}</div>
+      <div class="card-small">${s.lastCheckin||''}</div>
+
+      <div>
+        <span class="alert-high"> ${s.highAlerts||0}</span>
+        <span class="alert-medium"> ${s.mediumAlerts||0}</span>
+      </div>
+
+      <div class="card-small">${s.serverOs||''}</div>
+      <div class="card-small">${s.nodeTypeCode||''}</div>
+    `;
+
+    card.onclick=()=>{
+
+      if(selectedCard) selectedCard.classList.remove("selected");
+
+      card.classList.add("selected");
+      selectedCard=card;
+
+      serverAtual=s.name;
+
+      loadAdapters();
+    };
+
+    cards.appendChild(card);
+  });
+}
+
+/* ADAPTERS */
+async function loadAdapters(){
+
+  let res = await apiFetch(`${baseUrl}/api/v1/server/servers/${serverAtual}/adapters`,{
+    headers:{'CC_Authorization':token}
+  });
+
+  let data = await res.json();
+  adapters=data.data;
+
+  renderAdapters();
+}
+
+function renderAdapters(){
+  let filtro=search.value.toLowerCase();
+  adaptersTable.innerHTML="";
+
+  adapters.forEach(a=>{
+    if(filter!=="ALL" && a.state!==filter) return;
+    if(!a.displayName.toLowerCase().includes(filtro)) return;
+
+    adaptersTable.innerHTML+=`
+    <tr>
+    <td>${a.displayName}</td>
+    <td>${a.name}</td>
+    <td>${a.subtype}</td>
+    <td><span class="dot ${a.state==="ACTIVE"?"green":"red"}"></span></td>
+    </tr>`;
+  });
+}
+
+/* FILES */
+fileFilter.addEventListener("keyup", ()=>{
+  if(fileFilter.value.length>=4){
+    filePage=1;
+    loadFiles();
+  }
+});
+
+async function loadFiles(){
+
+  let filtro=fileFilter.value;
+
+  let res = await apiFetch(
+    `${baseUrl}/api/v1/fileTransfers?serverName=${serverAtual}&localFileName=${filtro}&limit=${limit}&startIndex=${filePage}&sortColumn=started&sortOrder=desc`,
+    { headers:{'CC_Authorization':token} }
+  );
+
+  let data=await res.json();
+
+  totalRows=parseInt(data.totalRows || 0);
+  filesTotal.innerText=`Total: ${totalRows} registros`;
+
+  filesTable.innerHTML="";
+
+  data.data.forEach(f=>{
+    filesTable.innerHTML+=`
+    <tr>
+      <td>${f.localFileName||f.remoteFileName}</td>
+      <td>${f.process?.procName||''}</td>
+      <td>${f.fileSize}</td>
+      <td><span class="dot ${f.transferStatus==="success"?"green":"red"}"></span></td>
+      <td>${f.started}</td>
+    </tr>`;
+  });
+
+  updatePagination();
+}
+
+function updatePagination(){
+  let totalPages=Math.ceil(totalRows / limit);
+  pageInfo.innerText=`Pána ${filePage} de ${totalPages}`;
+}
+
+function nextPage(){
+  let totalPages=Math.ceil(totalRows / limit);
+  if(filePage < totalPages){
+    filePage++;
+    loadFiles();
+  }
+}
+
+function prevPage(){
+  if(filePage > 1){
+    filePage--;
+    loadFiles();
+  }
+}
+
+/* FILTER */
+function setFilter(f,btn){
+  filter=f;
+  document.querySelectorAll(".btn-filter").forEach(b=>b.classList.remove("active-filter"));
+  btn.classList.add("active-filter");
+  renderAdapters();
+}
+
+/* TABS */
+function openTab(tab,el){
+
+  adaptersTable.innerHTML="";
+  filesTable.innerHTML="";
+
+  document.getElementById("adaptersTab").style.display="none";
+  document.getElementById("filesTab").style.display="none";
+
+  document.getElementById(tab+"Tab").style.display="block";
+
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  el.classList.add("active");
+}
+
+
+function openMenu(menu, el){
+
+    document.getElementById("homePage").style.display = "none";
+    document.getElementById("transferenciaPage").style.display = "none";
+    document.getElementById("localizarArquivoPage").style.display = "none";
+
+    document.getElementById(menu + "Page").style.display = "block";
+
+    document
+        .querySelectorAll(".menu-item")
+        .forEach(x => x.classList.remove("active"));
+
+    el.classList.add("active");
+}
+
+// Paginacao
+let paginaAtual = 1;
+const limite = 5;
+// Paginacao
+
+let inicioPesquisa;
+
+let fimPesquisa;
+
+async function pesquisarEventos(inicio, fim){
+
+	inicioPesquisa = inicio;
+
+	fimPesquisa = fim;
+
+
+    const codigo = document
+        .getElementById("codigoIntegracao")
+        .value
+        .trim();
+
+    if(!codigo){
+        alert("Informe o código da integração.");
+        return;
+    }
+
+    eventosTable.innerHTML = "";
+    eventosTotal.innerHTML = "Pesquisando...";
+
+    const body = {
+        limit: limite,
+        pageNumber: paginaAtual,
+        sortOrder: "desc",
+        sortColumn: "procId",
+        filters: [
+           {
+				key: "started",
+				operator: "GTE",
+				value: inicio.toISOString(),
+				isDefault: true
+			},
+			{
+				key: "ended",
+				operator: "LTE",
+				value: fim.toISOString(),
+				isDefault: true
+			},
+            {
+                key: "procName",
+                operator: "ENDS_WITH_CASE_SENSITIVE",
+                value: codigo,
+                isDefault: true
+            },
+            {
+                key: "serverId",
+                operator: "MATCHES",
+                value: "706",
+                isDefault: true
+            }
+        ],
+        showAllColumns: true,
+        count: true
+    };
+
+    try{
+
+        const response = await apiFetch(
+            `${baseUrl}/api/v1/process/search`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "CC_Authorization": token
+                },
+                body: JSON.stringify(body)
+            }
+        );
+
+        const data = await response.json();
+		
+		
+		// Paginacao
+		const totalRows = Number(data.totalRows || 0);
+		const totalPaginas = Math.ceil(totalRows / limite);
+
+		document.getElementById("lblPagina").innerHTML =
+			`Página ${paginaAtual} de ${totalPaginas}`;
+
+		document.getElementById("btnAnterior").disabled =
+			paginaAtual <= 1;
+
+		document.getElementById("btnProxima").disabled =
+			paginaAtual >= totalPaginas;
+			
+			
+			
+
+        eventosTotal.innerHTML =
+            `Total de eventos: ${data.totalRows || 0}`;
+        let advancedStatus = "";
+        for (const evento of (data.data || [])) {        
+
+            const sucesso = evento.returnCode !== "8";
+			if (evento.returnCode === "8") {
+				advancedStatus = await obterAdvancedStatus(evento.procId);				
+			} else {				
+				if (evento.stepNames &&
+					evento.stepNames.toLowerCase().includes("mailboxadd")) {
+    				advancedStatus = await obterDetalheSucesso(evento.procId, codigo);
+				} else {
+					advancedStatus = "";
+				}
+			}			
+			advancedStatus = advancedStatus?.trim() || "Não há Arquivos";
+
+            eventosTable.innerHTML += `
+                <tr onclick="toggleDetalhe('${evento.procId}', '${codigo}')" style="cursor:pointer">
+                    <td style="width:100px">
+                        <span class="dot ${sucesso ? 'green' : 'red'}"></span>
+                        ${sucesso ? 'Sucesso' : 'Erro'}
+                    </td>
+					<td style="width:100px" >${evento.procId || ''}</td>
+					<td style="width:60px">${evento.procName || ''}</td>                    
+					<td style="width:30px">${formatarDuracao(evento.duration || '0')}</td>    
+					<td style="width:60px">${formatarDataBrasilia(evento.started)}</td>
+					
+					<td class="status-cell" style="width:60px">${advancedStatus}</td>                    
+                </tr>
+				
+				<tr id="detalhe-${evento.procId}" style="display:none">
+				<td></td>
+				<td></td>
+				<td colspan="4">
+					<div id="conteudo-${evento.procId}"></div>
+				</td>
+				</tr>
+            `;
+        }
+	
+    } catch(ex){
+        console.error(ex);
+        eventosTotal.innerHTML =
+            "Erro ao consultar eventos.";
+    }
+}
+
+async function toggleDetalhe(procId, codigo) {
+
+    const linha = document.getElementById(`detalhe-${procId}`);
+    const conteudo = document.getElementById(`conteudo-${procId}`);
+
+    // Fechar
+    if (linha.style.display === 'table-row') {
+        linha.style.display = 'none';
+        return;
+    }
+
+    if (linha.style.display === 'none') {
+
+        linha.style.display = 'table-row';
+
+        if (!conteudo.dataset.carregado) {
+            conteudo.innerHTML =
+                await obterDetalheSucessoSubTabela(procId, codigo);
+
+            conteudo.dataset.carregado = 'true';
+        }
+
+    } else {
+
+        linha.style.display = 'none';
+    }
+}
+
+function proximaPagina() {
+    paginaAtual++;
+    pesquisarEventos(inicioPesquisa, fimPesquisa);
+}
+
+
+
+function paginaAnterior() {
+    if (paginaAtual > 1) {
+        paginaAtual--;
+        pesquisarEventos(inicioPesquisa, fimPesquisa);
+    }
+}
+
+
+async function obterAdvancedStatus(procId) {
+
+    const body = {
+        limit: 50,
+        pageNumber: 1,
+        sortOrder: "desc",
+        sortColumn: "procId",
+        filters: [
+            {
+                key: "procId",
+                operator: "MATCHES_CASE_SENSITIVE",
+                value: procId,
+                isDefault: true
+            },
+            {
+                key: "retCode",
+                operator: "MATCHES_CASE_SENSITIVE",
+                value: "8"
+            },
+			 {
+                key: "eventType",
+                operator: "MATCHES",
+                value: "2"
+            }
+        ],
+        showAllColumns: true,
+        count: true
+    };
+
+    const response = await apiFetch(
+        `${baseUrl}/api/v1/stats/bp/search`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "CC_Authorization": token
+            },
+            body: JSON.stringify(body)
+        }
+    );
+
+    const data = await response.json();
+
+    return (data.data || []).map(item => item.advancedStatus).filter(Boolean).join(" ");
+}
+
+
+async function obterDetalheSucessoSubTabela(procId, codigo) {
+
+    const responseAf = await apiFetch(
+        `${baseUrl}/api/v1/stats/af/search`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "CC_Authorization": token
+            },
+            body: JSON.stringify({
+                limit: 50,
+                pageNumber: 1,
+                sortOrder: "desc",
+                sortColumn: "conEndTime",
+                filters: [
+                    {
+                        key: "adapterName",
+                        operator: "MATCHES_CASE_SENSITIVE",
+                        value: "MessageAdd",
+                        isDefault: true
+                    },
+                    {
+                        key: "wfid",
+                        operator: "MATCHES_CASE_SENSITIVE",
+                        value: procId,
+                        isDefault: true
+                    },
+					{
+                        key: "eventType",
+                        operator: "MATCHES",
+                        value: "2",
+                        isDefault: true
+                    }
+                ],
+                showAllColumns: true,
+                count: true
+            })
+        }
+    );
+
+    const afData = await responseAf.json();
+
+    if (!afData.data?.length) {
+        return "";
+    }
+    
+	const resultados = [];
+    for (const af of afData.data) {
+
+        const documentId = af.docId || af.documentId;
+
+        const responseFg = await apiFetch(
+            `${baseUrl}/api/v1/stats/fg/search`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "CC_Authorization": token
+                },
+                body: JSON.stringify({
+                    limit: 10,
+                    pageNumber: 1,
+                    sortOrder: "asc",
+                    sortColumn: "time",
+                    filters: [
+                        {
+                            key: "prodOrgKey",
+                            operator: "ENDS_WITH_CASE_SENSITIVE",
+                            value: codigo,
+                            isDefault: true
+                        },
+                        {
+                            key: "documentId",
+                            operator: "MATCHES_CASE_SENSITIVE",
+                            value: documentId,
+                            isDefault: true
+                        },
+                        {
+                            key: "messageId",
+                            operator: "BEGINS_WITH_CASE_SENSITIVE",
+                            value: "FG_0702",
+                            isDefault: true
+                        }
+                    ],
+                    showAllColumns: true,
+                    count: true
+                })
+            }
+        );
+		
+        const fgData = await responseFg.json();
+        
+        for (const fg of (fgData.data || [])) {
+
+            resultados.push(
+				`<tr>
+                <td style="width:60px">${fg.consOrgKey}</td>
+                <td style="width:100px">
+                    <span style="color:green">✔</span>
+                    ${fg.fileName}
+                </td>
+                <td style="width:60px">${fg.shortMsg}</td>
+				<td style="width:60px" id="icone-">📃</td>
+            </tr>`
+			);
+        }
+    }
+	
+    let html = `
+        <table class="subtable" >
+            <thead>
+				<tr style="background:linear-gradient(90deg,#005CA9,#0078D4);color:white">
+
+					<th colspan="4" style="padding:8px;text-align:left">
+						Arquivos Entregues
+					</th>
+				</tr>
+                <tr>
+					
+                    <th>Entregue</th>
+                    <th>Arquivo</th>
+                    <th>Msg</th>					
+					<th>Detalhes</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+        html += resultados;
+    
+    html += `
+            </tbody>
+        </table>
+    `;
+
+    return html;
+}
+
+
+async function obterDetalheSucesso(procId, codigo) {
+
+    const responseAf = await apiFetch(
+        `${baseUrl}/api/v1/stats/af/search`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "CC_Authorization": token
+            },
+            body: JSON.stringify({
+                limit: 50,
+                pageNumber: 1,
+                sortOrder: "desc",
+                sortColumn: "conEndTime",
+                filters: [
+                    {
+                        key: "adapterName",
+                        operator: "MATCHES_CASE_SENSITIVE",
+                        value: "MessageAdd",
+                        isDefault: true
+                    },
+                    {
+                        key: "wfid",
+                        operator: "MATCHES_CASE_SENSITIVE",
+                        value: procId,
+                        isDefault: true
+                    },
+					{
+                        key: "eventType",
+                        operator: "MATCHES",
+                        value: "2",
+                        isDefault: true
+                    }
+                ],
+                showAllColumns: true,
+                count: true
+            })
+        }
+    );
+
+    const afData = await responseAf.json();
+
+    if (!afData.data?.length) {
+        return "";
+    }
+
+    const resultados = [];
+	
+	for (const af of afData.data) {
+	        resultados.push(
+				`<div style="margin-bottom:4px">
+					<span style="color:green">✔</span>
+					<b>${af.docName || ""}</b><br>					
+				</div>`
+			);
+	}
+	
+	
+	afData.data = [];
+    for (const af of afData.data) {
+	
+        const documentId = af.docId || af.documentId;
+
+        const responseFg = await apiFetch(
+            `${baseUrl}/api/v1/stats/fg/search`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "CC_Authorization": token
+                },
+                body: JSON.stringify({
+                    limit: 10,
+                    pageNumber: 1,
+                    sortOrder: "asc",
+                    sortColumn: "time",
+                    filters: [
+                        {
+                            key: "prodOrgKey",
+                            operator: "ENDS_WITH_CASE_SENSITIVE",
+                            value: codigo,
+                            isDefault: true
+                        },
+                        {
+                            key: "documentId",
+                            operator: "MATCHES_CASE_SENSITIVE",
+                            value: documentId,
+                            isDefault: true
+                        },
+                        {
+                            key: "messageId",
+                            operator: "BEGINS_WITH_CASE_SENSITIVE",
+                            value: "FG_0702",
+                            isDefault: true
+                        }
+                    ],
+                    showAllColumns: true,
+                    count: true
+                })
+            }
+        );
+		
+        const fgData = await responseFg.json();        
+        for (const fg of (fgData.data || [])) {
+
+            resultados.push(
+				`<div style="margin-bottom:4px">
+					<span style="color:green">✔</span>
+					<b>${fg.eventId} -  ${fg.fileName || ""}</b><br>
+					${fg.shortMsg || ""}
+				</div>`
+			);
+        }
+    }
+
+    return resultados.join("  ");
+}
+
+function formatarDuracao(durationMs) {
+    const ms = Number(durationMs);
+
+    if (ms < 1000) {
+        return "menos de 1 segundo";
+    }
+
+    const totalSegundos = Math.floor(ms / 1000);
+
+    if (totalSegundos < 60) {
+        return `${totalSegundos} segundo${totalSegundos > 1 ? 's' : ''}`;
+    }
+
+    const minutos = Math.floor(totalSegundos / 60);
+    const segundos = totalSegundos % 60;
+
+    if (segundos === 0) {
+        return `${minutos} minuto${minutos > 1 ? 's' : ''}`;
+    }
+
+    return `${minutos} minuto${minutos > 1 ? 's' : ''} e ${segundos} segundo${segundos > 1 ? 's' : ''}`;
+}
+``
+
+function formatarDataBrasilia(dataStr) {
+    if (!dataStr) return '';
+
+    const data = new Date(dataStr + 'Z');
+
+    const partes = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Sao_Paulo',
+        hour12: true,
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit'
+    }).formatToParts(data);
+
+    const get = tipo => partes.find(p => p.type === tipo)?.value;
+
+    return `${get('day')}/${get('month')}/${get('year')} ${get('hour')}:${get('minute')}:${get('second')} ${get('dayPeriod')}`;
+}
+
+function formatarDataBrasilia_2(dataStr) {
+
+    const iso = dataStr.replace(
+        /(\d{4})\/(\d{2})\/(\d{2}) (\d{2}:\d{2}:\d{2}\.\d{3})/,
+        '$1-$2-$3T$4Z'
+    );
+
+    const data = new Date(iso);
+
+    return data.toLocaleString('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        hour12: false,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+}
+
+let periodoAtual = 0;
+
+function carregarPeriodo(periodo) {
+
+    periodoAtual = periodo;
+
+    const fim = new Date();
+    fim.setHours(23,59,59,999);
+
+    // recua blocos de 10 dias
+    fim.setDate(fim.getDate() - (periodo * 10));
+
+    const inicio = new Date(fim);
+    inicio.setDate(inicio.getDate() - 10);
+
+    document.getElementById("periodoSelecionado").innerText =
+        `${formatarData(inicio)} até ${formatarData(fim)}`;
+
+    pesquisarEventos(inicio, fim);
+}
+
+function formatarData(data){
+    return data.toLocaleDateString('pt-BR');
+}
+
+
+function pesquisarHoje() {
+    paginaAtual = 1;
+    const agora = new Date();
+
+    const inicio = new Date(agora);
+    inicio.setHours(0, 0, 0, 0);
+
+    const fim = new Date(agora);
+    fim.setHours(23, 59, 59, 999);
+
+    pesquisarEventos(inicio, fim);
+}
+
+function moverPeriodo(direcao){
+
+    periodoAtual += direcao;
+
+    if(periodoAtual < 0){
+        periodoAtual = 0;
+    }
+
+    carregarPeriodo(periodoAtual);
+}
+
+
+async function apiFetch(url, options = {}) {
+
+    const response = await fetch(url, options);
+
+    if (response.status === 401) {
+
+        token = "";
+
+        app.style.display = "none";
+        loginPage.style.display = "flex";
+
+        alert("Sessão expirada. Efetue login novamente.");
+
+        throw new Error("Unauthorized");
+    }
+
+    return response;
+}
+
+async function obterAF() {
+
+const arquivo =
+        document.getElementById("nomeArquivo").value.trim();
+
+    const responseAf = await apiFetch(
+        `${baseUrl}/api/v1/stats/af/search`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "CC_Authorization": token
+            },
+            body: JSON.stringify({
+                limit: 50,
+                pageNumber: 1,
+                sortOrder: "desc",
+                sortColumn: "conEndTime",
+                filters: [
+                    {
+                        key: "adapterName",
+                        operator: "MATCHES_CASE_SENSITIVE",
+                        value: "MessageAdd",
+                        isDefault: true
+                    },
+                    {
+                        key: "docName",
+                        operator: "CONTAINS_CASE_SENSITIVE",
+                        value: arquivo,
+                        isDefault: true
+                    },
+					{
+                        key: "eventType",
+                        operator: "MATCHES",
+                        value: "2",
+                        isDefault: true
+                    }
+                ],
+                showAllColumns: true,
+                count: true
+            })
+        }
+    );
+
+    const afData = await responseAf.json();
+
+    if (!afData.data?.length) {
+        return "";
+    }
+
+    return afData;
+}
+
+async function obterArquivosCapturados() {
+
+    const fgData = await obterFG();
+    const afData = await obterAF();
+
+    const afMap = {};
+
+    afData.data.forEach(af => {
+        afMap[af.docId] = af;
+    });
+
+    let html = `
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Nome Arquivo</th>
+                    <th>Data</th>
+                    <th>Status</th>
+                    <th>SFG</th>
+                    <th>Data Captura</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    fgData.data.forEach(fg => {
+
+        const af = afMap[fg.documentId];
+
+        html += `
+            <tr>
+                <td>${fg.fileName || ""}</td>
+                <td>${fg.logDateTime || ""}</td>
+                <td>
+                    ${af
+                        ? '<span style="color:green;font-weight:bold">✔ Capturado</span>'
+                        : '<span style="color:red;font-weight:bold">✖ Não Capturado</span>'
+                    }
+                </td>
+                <td>${fg.sourceFile || ""}</td>
+                <td>${af?.startTime || ""}</td>
+            </tr>
+        `;
+    });
+
+    html += `
+            </tbody>
+        </table>
+    `;
+
+    document.getElementById("resultadoArquivo").innerHTML = html;
+}
+
+async function obterFG() {
+
+    const codigo =
+        document.getElementById("codigoLocalizacao").value.trim();
+
+    const arquivo =
+        document.getElementById("nomeArquivo").value.trim();
+
+    if (!codigo || !arquivo) {
+        alert("Informe o código e o arquivo.");
+        return;
+    }
+
+    resultadoArquivo.innerHTML = "Pesquisando...";
+
+    try {
+
+        const body = {
+            limit: 10,
+            pageNumber: 1,
+            sortOrder: "desc",
+            sortColumn: "time",
+            filters: [
+                {
+                    key: "prodOrgKey",
+                    operator: "ENDS_WITH_CASE_SENSITIVE",
+                    value: codigo,
+                    isDefault: true
+                },
+                {
+                    key: "fileName",
+                    operator: "CONTAINS_CASE_SENSITIVE",
+                    value: arquivo,
+                    isDefault: true
+                }
+            ],
+            showAllColumns: true,
+            count: true
+        };
+
+        const response = await apiFetch(
+            `${baseUrl}/api/v1/stats/fg/search`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "CC_Authorization": token
+                },
+                body: JSON.stringify(body)
+            }
+        );
+
+        const data = await response.json();
+
+        //resultadoArquivo.innerHTML =`<pre>${JSON.stringify(data, null, 2)}</pre>`;
+		
+		return data;
+
+    } catch (e) {
+
+        console.error(e);
+
+        resultadoArquivo.innerHTML =
+            "Erro ao localizar arquivo.";
+    }
+}
+
+
+/* LOGOUT */
+function logout() {
+    token = "";
+    document.getElementById("app").style.display = "none";
+    document.getElementById("loginPage").style.display = "flex";
+
+    document.getElementById("password").value = "";
+
+    alert("Sua sessão expirou. Faça login novamente.");
+}
+
+</script>
+
+</body>
+</html>
+

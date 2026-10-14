@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MODELO - Portal de Integrações B2B</title>
+
+<style>
+*{box-sizing:border-box;}
+
+body{
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #e8f0fe 0%, #f4f6f9 100%);
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+header{
+    background: linear-gradient(90deg, #003f7a 0%, #005CA9 100%);
+    color: white;
+    padding: 28px 40px 18px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(0,0,0,.2);
+}
+
+header h1{
+    margin: 0;
+    font-size: 2rem;
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+
+header p{
+    margin: 6px 0 0;
+    font-size: 0.9rem;
+    opacity: 0.85;
+    letter-spacing: 0.5px;
+}
+
+main{
+    flex: 1;
+    padding: 50px 20px 40px;
+}
+
+.container{
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 28px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.card{
+    width: 220px;
+    min-height: 190px;
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 4px 16px rgba(0,92,169,.12);
+    cursor: pointer;
+    transition: transform .25s, box-shadow .25s;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 24px 16px;
+    border-top: 4px solid #005CA9;
+}
+
+.card:hover{
+    transform: translateY(-7px);
+    box-shadow: 0 12px 28px rgba(0,92,169,.22);
+}
+
+.icone{
+    font-size: 40px;
+    margin-bottom: 14px;
+}
+
+.titulo{
+    font-size: 15px;
+    font-weight: 700;
+    color: #005CA9;
+    line-height: 1.4;
+}
+
+.descricao{
+    margin-top: 8px;
+    color: #666;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+footer{
+    text-align: center;
+    padding: 16px;
+    font-size: 12px;
+    color: #888;
+    border-top: 1px solid #dde3ec;
+    background: #f0f3f8;
+    letter-spacing: 0.4px;
+}
+
+footer span{
+    color: #005CA9;
+    font-weight: 600;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🔗 MODELO - Portal de Integrações B2B</h1>
+    <p>Gerencie e monitore suas integrações de forma simples e eficiente</p>
+</header>
+
+<main>
+<div class="container">
+
+    <div class="card" onclick="window.location.href='index5.html'">
+        <div class="icone">➕</div>
+        <div class="titulo">Criar Integração</div>
+        <div class="descricao">Cadastro de novas integrações</div>
+    </div>
+
+    <div class="card" onclick="window.location.href='detalhes.html'">
+        <div class="icone">🔍</div>
+        <div class="titulo">Componentes da Integração</div>
+        <div class="descricao">Consultar e excluir integrações</div>
+    </div>
+
+    <div class="card" onclick="window.location.href='detalhes2.html'">
+        <div class="icone">📋</div>
+        <div class="titulo">Detalhes Integração por Sistema</div>
+        <div class="descricao">Consultar detalhes por sistema</div>
+    </div>
+
+    <div class="card" onclick="window.location.href='detalhes3.html'">
+        <div class="icone">📊</div>
+        <div class="titulo">Painel da Integração</div>
+        <div class="descricao">Visualizar painel completo</div>
+    </div>
+
+    <div class="card" onclick="window.location.href='detalhes_.html'">
+        <div class="icone">🔗</div>
+        <div class="titulo">Outras Integrações</div>
+        <div class="descricao">Consultar demais integrações</div>
+    </div>
+
+    <div class="card" onclick="window.location.href='upload.html'">
+        <div class="icone">📤</div>
+        <div class="titulo">Upload via RestAPI SFG</div>
+        <div class="descricao">Exemplo de upload de arquivos</div>
+		<div class="descricao"><a href="upload2.html">Várias Partes</a> </div>
+    </div>
+
+</div>
+</main>
+
+<footer>
+    Powered by <span>IBM BOB</span>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel da Integração</title>
+
+<style>
+*{box-sizing:border-box;}
+
+body{
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #e8f0fe 0%, #f4f6f9 100%);
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+header{
+    background: linear-gradient(90deg, #003f7a 0%, #005CA9 100%);
+    color: white;
+    padding: 22px 40px 14px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(0,0,0,.2);
+}
+
+header h1{
+    margin: 0;
+    font-size: 1.7rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+main{
+    flex: 1;
+    padding: 30px 30px 20px;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.card{
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,92,169,.12);
+    border-top: 4px solid #005CA9;
+    margin-bottom: 24px;
+}
+
+input{
+    width: 260px;
+    padding: 9px 12px;
+    border: 1px solid #c8d4e8;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color .2s;
+}
+
+input:focus{
+    outline: none;
+    border-color: #005CA9;
+    box-shadow: 0 0 0 3px rgba(0,92,169,.1);
+}
+
+button{
+    padding: 9px 20px;
+    background: #005CA9;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background .2s, transform .1s;
+}
+
+button:hover{
+    background: #004a8c;
+    transform: translateY(-1px);
+}
+
+table{
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+th{
+    background: #005CA9;
+    color: white;
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 600;
+}
+
+th:first-child{ border-radius: 6px 0 0 0; }
+th:last-child{ border-radius: 0 6px 0 0; }
+
+td{
+    padding: 10px 14px;
+    border-bottom: 1px solid #e8edf5;
+}
+
+tr:nth-child(even){ background: #f4f7fc; }
+tr:hover{ background: #eaf0fb; }
+
+.tipo{
+    font-weight: 700;
+    color: #005CA9;
+}
+
+.loading-modal{
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,.45);
+    z-index: 99999;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-content{
+    background: white;
+    padding: 34px 48px;
+    border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.3);
+    text-align: center;
+}
+
+.spinner{
+    width: 52px;
+    height: 52px;
+    border: 5px solid #dde5f0;
+    border-top: 5px solid #005CA9;
+    border-radius: 50%;
+    animation: girar 1s linear infinite;
+    margin: auto;
+}
+
+.loading-text{
+    margin-top: 16px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #005CA9;
+}
+
+@keyframes girar{
+    from{ transform: rotate(0deg); }
+    to{ transform: rotate(360deg); }
+}
+
+.card-integracao{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0,92,169,.12);
+    width: calc(50% - 20px);
+    min-width: 550px;
+}
+
+.bloco-sistema{
+    width: 200px;
+    text-align: center;
+}
+
+.icone{ font-size: 28px; }
+
+.label{
+    margin-top: 8px;
+    font-size: 11px;
+    color: #777;
+}
+
+.nome{
+    margin-top: 4px;
+    color: #005CA9;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.badge{
+    margin-top: 8px;
+    display: inline-block;
+    background: #dbeafe;
+    color: #005CA9;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+}
+
+.azure{ background: #e0f2fe; }
+
+.fluxo{
+    flex: 1;
+    text-align: center;
+    position: relative;
+}
+
+.linha{
+    height: 3px;
+    background: #d0d7de;
+    margin: 0 20px;
+}
+
+.seta{
+    font-size: 24px;
+    color: #22c55e;
+    margin-top: -18px;
+    animation: mover 1.5s infinite;
+}
+
+.codigo{
+    margin-top: 8px;
+    font-weight: 700;
+    color: #444;
+    font-size: 13px;
+}
+
+@keyframes mover{
+    0%{ transform: translateX(0); }
+    50%{ transform: translateX(10px); }
+    100%{ transform: translateX(0); }
+}
+
+#listaIntegracoes{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.consulta-card{
+    width: 380px;
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,92,169,.12);
+    border-top: 4px solid #005CA9;
+    margin: 20px auto;
+    text-align: center;
+}
+
+footer{
+    text-align: center;
+    padding: 14px;
+    font-size: 12px;
+    color: #888;
+    border-top: 1px solid #dde3ec;
+    background: #f0f3f8;
+    letter-spacing: 0.4px;
+}
+
+footer span{
+    color: #005CA9;
+    font-weight: 600;
+}
+</style>
+</head>
+
+<body>
+<header>
+    <h1>📊 Painel da Integração</h1>
+</header>
+<main>
+
+
+<div class="consulta-card">
+
+    <label>Codigo Intergração</label><br>
+
+    <input id="codIntegracao" value="FGTS">
+
+    <br><br>
+
+
+    <button id="btnExecutar" onclick="consultar()">Consultar</button>
+
+    <button onclick="window.location.href='index.html'"  style="
+            background:#6c757d;
+            color:white;
+            border:none;
+            padding:8px 15px;
+            border-radius:5px;
+            cursor:pointer;">
+        ← Voltar
+    </button>
+
+</div>
+
+<div id="listaIntegracoes"></div>
+
+<div id="loadingModal" class="loading-modal">
+    <div class="loading-content">
+        <div class="spinner"></div>
+        <div class="loading-text">
+            Carregando informações...
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+
+let recursos = {
+    tradingPartners: [],
+    canais: [],
+    schedules: [],
+    servicos: [],
+    idProdutor: null,
+    idConsumidor: null,
+    idworkflow: []
+};
+
+const mapaIntegracoes = {};
+
+
+function obterCodigoIntegracao(nomeParceiro) {
+
+    const partes = nomeParceiro.split("_");
+
+    return partes[partes.length - 1];
+}
+
+function descricaoProtocolo(canal) {
+  switch (canal.producer?.protocolo) {
+    case "NFS":
+      return `NFS (${procurarParametro(producer.services, "collectionFolder") || "-"})`;
+
+    case "FTP":
+      return `FTP (${producer.host || "-"})`;
+
+    case "SFTP":
+      return `SFTP (${producer.host || "-"})`;
+
+    case "BROWSER":
+      return `BROWSER (${canal.producerMailboxPath || "-"})`;
+
+    default:
+      return canal.producer?.protocolo || "-";
+  }
+}
+
+
+
+function carregarCards(canais) {
+
+    const container =
+        document.getElementById("listaIntegracoes");
+
+    container.innerHTML = "";
+
+    canais.forEach(canal => {
+
+        const qtdSchedules =
+            canal.producer?.schedules?.length || 0;
+
+        const qtdServicos =
+            canal.producer?.services?.length || 0;
+
+        const qtdWorkflows =
+            canal.producer?.workflows?.length || 0;
+	
+		console.log(canal);
+
+
+        container.innerHTML += `
+
+        <div class="card-integracao">
+
+            <div class="bloco-sistema">
+
+                <div class="icone">📤</div>
+
+                <div class="label">
+                    SISTEMA ORIGEM
+                </div>
+
+                <div class="nome">
+                    ${obterNomeSistema(canal.producer?.name)}
+                </div>
+
+                <div class="badge">
+                    ${descricaoProtocolo(canal)}
+                </div>				
+
+            </div>
+
+            <div class="fluxo">
+
+                <div class="seta">
+                    ➜
+                </div>
+
+                <div class="codigo">
+                    ${canal.producer?.name?.split("_")[1] || ""}
+                </div>
+
+                <small>
+
+                    <b>Template:</b>
+                    ${canal.templateName || "-"}
+
+                    <br>
+
+                    <b>Mailbox:</b>
+                    ${canal.producerMailboxPath || "-"}
+
+                    <br>
+
+                    <b>Schedules:</b>
+                    ${qtdSchedules}
+
+                    <br>
+
+                    <b>Serviços:</b>
+                    ${qtdServicos}
+
+                    <br>
+
+                    <b>Workflows:</b>
+                    ${qtdWorkflows}
+
+                </small>
+
+            </div>
+
+            <div class="bloco-sistema">
+
+                <div class="icone">📥</div>
+
+                <div class="label">
+                    SISTEMA DESTINO
+                </div>
+
+                <div class="nome">                    
+					${obterNomeSistema(canal.consumer?.name)}
+                </div>
+
+                <div class="badge azure" >
+                    ${canal.consumer?.protocolo || "-"} ( ${procurarParametro(canal.consumer, "host_AFTRouteViaExtractFSA_PATH_EXTRACT_FSA")} )
+					
+                </div>
+
+                <div style="
+                    margin-top:8px;
+                    font-size:11px;
+                    color:#666;
+                ">
+                    
+                </div>
+
+            </div>
+
+        </div>
+
+        `;
+    });
+}
+function procurarParametro(texto, parametro) {
+
+    if (!texto) {
+        return null;
+    }
+
+    if (typeof texto === "object") {
+
+        if (texto.customProtocolExtensions) {
+            texto = texto.customProtocolExtensions;
+
+        } else if (texto.instParms) {
+            texto = texto.instParms;
+
+        } else {
+            return null;
+        }
+    }
+
+    let match = texto.match(
+        new RegExp(`'${parametro}':'([^']+)'`)
+    );
+
+    if (match) {
+        return match[1];
+    }
+
+    match = texto.match(
+        new RegExp(`${parametro}:([^,]+)`)
+    );
+
+    if (match) {
+        return match[1];
+    }
+
+    return null;
+}
+
+function formatarCustomProtocolExtensions(texto) {
+
+    if (!texto) {
+        return "Não informado";
+    }
+
+    return texto
+        .split(",")
+        .filter(item => item.trim() !== "")
+        .map(item => {
+
+            const [chave, valor] = item.split(":");
+
+            return `
+                <div style="margin-bottom:4px">
+                    <b>${chave}</b>: ${valor || ""}
+                </div>
+            `;
+        })
+        .join("");
+}
+
+
+
+const integracoes = [];
+
+
+function obterNomeSistema(nomeParceiro) {
+
+    return nomeParceiro.split("_")[0];
+}
+
+
+function consultar() {
+
+    carregarIntegracoes(
+        document.getElementById("codIntegracao").value.trim()
+    );
+
+}
+
+async function carregarIntegracoes(codigo) {
+
+    integracoes.length = 0;
+	
+	mostrarLoading("Carregando Integrações...");
+
+    let produtor = null;
+    let consumidor = null;
+    let protocoloProdutor = "";
+    let protocoloConsumidor = "";
+	
+	
+	//
+	// CANAIS
+	//
+	const canalResponse = await getApi(
+		`/B2BAPIs/svc/routingchannels/?_range=0-999` +
+		`&searchByConsumer=` +
+		`&searchByTemplate=T_SIMPLE%25` +
+		`&searchByProducer=%25${codigo}%25`
+	);
+
+	const canais = [];
+
+	for (const canal of canalResponse) {
+
+    //
+    // Busca detalhes do Trading Partner Consumidor
+    //
+    let tpConsumidor = null;
+
+    try {
+
+        tpConsumidor = await getApi(
+            `/B2BAPIs/svc/tradingpartners/${canal.consumer}`
+        );
+
+    } catch (e) {
+
+        console.warn(
+            `Erro ao consultar TP ${canal.consumer}`
+        );
+    }
+
+    canais.push({
+
+        templateName: canal.templateName,
+
+        producer: {
+            name: canal.producer,
+            protocolo: canal.provisioningFacts?.find(
+                p => p.provFactName === "myProdutorProtocolo"
+            )?.provFactValue || "",
+
+			services: [],
+			schedule: [],
+			bp: []
+        },
+
+        consumer: {
+            name: canal.consumer,
+			protocolo: canal.provisioningFacts?.find(
+                p => p.provFactName === "myConsumidorProtocolo"
+            )?.provFactValue || "",
+
+            customProtocolName:
+                tpConsumidor?.customProtocolName || "",
+
+            customProtocolExtensions:
+                tpConsumidor?.customProtocolExtensions || "",
+			services: [],
+			schedule: [],
+			bp: []
+        },
+
+        producerMailboxPath:
+            canal.producerMailboxPath
+      });
+		
+		
+	for (const canal of canais) {
+
+    //
+    // SCHEDULES
+    //
+    const schedules = await getApi(
+        `/B2BAPIs/svc/schedules/?_range=0-20&searchFor=${canal.producer.name}`
+    );
+
+    canal.producer.schedules =
+        schedules?.notFound
+            ? []
+            : schedules.map(schedule => ({
+                id: schedule._id,
+                businessProcess: schedule.businessProcess,
+                timerSchedule: schedule.timerSchedule,
+                parametros: schedule.bpNameValuePairs || []
+            }));
+
+
+    //
+    // SERVICES
+    //
+    const services = await getApi(
+        `/B2BAPIs/svc/serviceinstances/?_range=0-20&serviceName=${canal.producer.name}&defName=`
+    );
+
+    canal.producer.services =
+        services?.notFound
+            ? []
+            : services.map(service => ({
+                id: service._id,
+                serviceName: service.serviceName,
+                displayName: service.displayName,
+                instParms: service.instParms				
+            }));
+
+
+    //
+    // WORKFLOWS
+    //
+    const workflows = await getApi(
+        `/B2BAPIs/svc/workflows/?_range=0-10&fieldList=brief&searchFor=${canal.producer.name}`
+    );
+
+    canal.producer.workflows =
+        workflows?.notFound
+            ? []
+            : workflows.map(workflow => ({
+                id: workflow.wfdID,
+                name: workflow.name
+            }));
+			
+	}
+	
+	// Montar os card 
+	
+	await carregarCards(canais);
+	    
+  }
+  
+  ocultarLoading();
+}
+
+
+async function excluirIntegracao() {
+
+    if (!confirm("Deseja realmente excluir a integração?")) {
+        return;
+    }
+
+    try {
+	
+		mostrarLoading("Excluindo Integração...");
+	
+	     //
+        // Canais
+        //
+        for (const id of recursos.canais) {
+
+            console.log("Excluindo Canal:", id);
+
+            await deleteApi(
+                `https://fgw.des.cluster1.node1.host:5076/B2BAPIs/svc/routingchannels/${id}`
+            );
+        }
+	
+	    //
+        // Trading Partners
+        //
+        for (const id of recursos.tradingPartners) {
+
+            console.log("Excluindo Trading Partner:", id);
+
+            await deleteApi(
+                `https://fgw.des.cluster1.node1.host:5076/B2BAPIs/svc/tradingpartners/${id}`
+            );
+        }
+
+
+
+        //
+        // Serviços
+        //
+        for (const id of recursos.servicos) {
+
+            console.log("Excluindo Serviço:", id);
+
+            await deleteApi(
+                `https://fgw.des.cluster1.node1.host:5076/B2BAPIs/svc/serviceinstances/${id}`
+            );
+        }
+
+        //
+        // Schedules
+        //
+        for (const id of recursos.schedules) {
+
+            console.log("Excluindo Schedule:", id);
+
+            await deleteApi(
+                `https://fgw.des.cluster1.node1.host:5076/B2BAPIs/svc/schedules/${id}`
+            );
+        }
+        
+        alert("Integração excluída com sucesso.");
+
+    } catch (e) {
+
+        console.error(e);
+
+        alert(
+            "Erro ao excluir integração.\n\n" +
+            e.message
+        );
+    } finally {
+	
+	
+		ocultarLoading();
+		
+	}
+}
+
+
+
+async function deleteApi(url) {
+
+    const response = await fetch(url, {
+        method: "DELETE",
+        headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization":
+                "Basic " + btoa("infrafacil:123456")
+        }
+    });
+
+    return response.ok;
+}
+
+async function getApi(url) {
+
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": "Basic " +
+                btoa("infrafacil:123456")
+        }
+    });
+	
+	if (response.status === 404) { 
+    
+		const erro = await response.json();
+
+		return {
+
+				notFound: true,
+
+				mensagem: erro.errorDescription
+
+				};
+
+	}
+
+    if (!response.ok) {
+	
+	    const erro = await response.json();
+        throw new Error(`HTTP ${response.status} - ${erro.errorDescription}`);
+    }
+
+    return await response.json();
+}
+
+function mostrarLoading(texto = "Carregando...") {
+
+    document.getElementById("loadingModal").style.display = "flex";
+
+    document.querySelector(".loading-text").innerText = texto;
+
+    document.body.style.cursor = "wait";
+}
+
+function ocultarLoading() {
+
+    document.getElementById("loadingModal").style.display = "none";
+
+    document.body.style.cursor = "default";
+}
+
+
+</script>
+
+
+
+</main>
+
+<footer>
+    Powered by <span>IBM BOB</span>
+</footer>
+
+</body>
+</html>
