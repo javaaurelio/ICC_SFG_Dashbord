@@ -18,7 +18,49 @@ Upload many threads
 <img width="1500" height="995" alt="image" src="https://github.com/user-attachments/assets/c1464756-9ee6-4ae1-90fc-12c1476016d7" />
 
 
-ICC  -Control Center
+Painel da Integracao
+<img width="2260" height="1735" alt="image" src="https://github.com/user-attachments/assets/8d3def91-d6a9-4a6e-8548-34117be045c9" />
+
+
+================================================================================================================================
+================================================================================================================================
+================================================================================================================================
+================================================================================================================================
+
+██╗  ██████╗ ██████╗
+██║ ██╔════╝██╔════╝
+██║ ██║     ██║
+██║ ██║     ██║
+██║ ╚██████╗╚██████╗
+╚═╝  ╚═════╝ ╚═════╝
+
+================================================================================================================================
+
+ICC  - Control Center
+ICC  - Control Center
+ICC  - Control Center
+ICC  - Control Center
+ICC  - Control Center
+ICC  - Control Center
+
+Localizar arquivos
+<img width="3725" height="1737" alt="image" src="https://github.com/user-attachments/assets/cf67f375-3b84-4405-9c81-0b2447a93d71" />
+
+
+Status
+<img width="1908" height="614" alt="Captura de tela 2026-10-14 103025" src="https://github.com/user-attachments/assets/60f76fd3-2f8d-468d-b1b0-242f8f4d8c1b" />
+
+
+<img width="1913" height="620" alt="Captura de tela 2026-10-14 103039" src="https://github.com/user-attachments/assets/a7d00cae-9da1-4574-8254-12c5f9b73868" />
+
+
+
+
+
+
+
+
+
 
 
 
