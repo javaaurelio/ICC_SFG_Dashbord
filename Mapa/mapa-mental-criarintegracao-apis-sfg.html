@@ -1,0 +1,512 @@
+
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mapa Mental — criarIntegracao</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4fb;color:#1e293b;font-size:13px;line-height:1.5;}
+
+/* ── Topo ── */
+.page-header{
+  background:linear-gradient(90deg,#003f7a,#005CA9);
+  color:#fff;padding:20px 32px 14px;
+}
+.page-header h1{font-size:1.4rem;font-weight:700;}
+.page-header p{font-size:.85rem;opacity:.85;margin-top:4px;}
+
+/* ── Layout ── */
+.body{padding:24px 28px 40px;max-width:1200px;margin:auto;}
+
+/* ── Legenda ── */
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:22px;}
+.leg{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;}
+.dot{width:12px;height:12px;border-radius:50%;}
+.dot-entry{background:#7c5cd8;}
+.dot-api{background:#005CA9;}
+.dot-get{background:#0891b2;}
+.dot-ret{background:#16a34a;}
+.dot-cond{background:#d97706;}
+
+/* ── host raiz ── */
+.root{
+  background:linear-gradient(135deg,#7c5cd8,#5b21b6);
+  color:#fff;border-radius:12px;
+  padding:14px 22px;font-size:14px;font-weight:700;
+  display:inline-flex;align-items:center;gap:10px;
+  box-shadow:0 4px 14px rgba(124,92,216,.4);
+  margin-bottom:28px;
+}
+
+/* ── Seção de caminho ── */
+.path-section{margin-bottom:32px;}
+.path-title{
+  background:#1e293b;color:#fff;
+  border-radius:8px 8px 0 0;
+  padding:9px 16px;font-weight:700;font-size:12px;
+  letter-spacing:.5px;text-transform:uppercase;
+  display:flex;align-items:center;gap:8px;
+}
+.path-body{
+  border:1px solid #dde3ec;border-top:none;
+  border-radius:0 0 10px 10px;
+  background:#fff;
+  overflow:hidden;
+}
+
+/* ── Passo ── */
+.step{
+  display:grid;
+  grid-template-columns:28px 1fr;
+  border-bottom:1px solid #f0f3f8;
+}
+.step:last-child{border-bottom:none;}
+
+.step-num{
+  background:#005CA9;color:#fff;
+  font-size:11px;font-weight:800;
+  display:flex;align-items:flex-start;
+  justify-content:center;padding-top:14px;
+  min-width:28px;
+}
+.step-num.get-num{background:#0891b2;}
+.step-num.cond-num{background:#d97706;}
+
+.step-inner{padding:12px 16px;}
+
+.step-title{
+  font-weight:700;font-size:13px;color:#1e293b;
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  margin-bottom:6px;
+}
+
+.badge-method{
+  font-size:10px;font-weight:800;padding:2px 7px;
+  border-radius:4px;letter-spacing:.5px;
+}
+.badge-post{background:#dbeafe;color:#1d4ed8;}
+.badge-get{background:#cffafe;color:#0e7490;}
+.badge-local{background:#f3e8ff;color:#7c3aed;}
+.badge-cond{background:#fef3c7;color:#b45309;}
+
+.endpoint{
+  font-family:'Courier New',monospace;
+  font-size:11.5px;color:#005CA9;font-weight:600;
+  background:#f0f7ff;padding:3px 8px;border-radius:4px;
+  display:inline-block;margin-bottom:8px;
+}
+
+/* ── Tabela de params ── */
+.params-label{
+  font-size:11px;font-weight:700;color:#64748b;
+  text-transform:uppercase;letter-spacing:.5px;
+  margin-bottom:5px;margin-top:8px;
+}
+table.params{width:100%;border-collapse:collapse;font-size:11.5px;}
+table.params th{
+  background:#f8faff;color:#374151;font-weight:700;
+  padding:5px 8px;text-align:left;
+  border-bottom:1px solid #e4eaf5;
+}
+table.params td{
+  padding:4px 8px;border-bottom:1px solid #f0f3f8;
+  vertical-align:top;
+}
+table.params tr:last-child td{border-bottom:none;}
+table.params td.field{font-family:'Courier New',monospace;color:#374151;font-weight:600;white-space:nowrap;}
+table.params td.src{color:#7c5cd8;font-size:11px;}
+table.params td.val{color:#374151;font-size:11.5px;}
+
+/* ── Retorno ── */
+.return-box{
+  background:#f0fdf4;border:1px solid #bbf7d0;
+  border-radius:6px;padding:7px 10px;margin-top:8px;
+  font-size:11.5px;
+}
+.return-box strong{color:#15803d;}
+.return-box .arrow{color:#16a34a;font-weight:700;}
+.ret-field{font-family:'Courier New',monospace;font-weight:700;color:#166534;}
+
+/* ── Nota ── */
+.note{
+  background:#fffbeb;border:1px solid #fde68a;
+  border-radius:6px;padding:6px 10px;margin-top:8px;
+  font-size:11.5px;color:#78350f;
+}
+.note strong{color:#92400e;}
+
+/* ── Footer ── */
+footer{text-align:center;padding:14px;font-size:11px;color:#888;border-top:1px solid #dde3ec;background:#f0f3f8;}
+footer span{color:#005CA9;font-weight:600;}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🗺️ Mapa Mental — criarIntegracao()</h1>
+  <p>Fluxo completo de chamadas de API ao clicar em "Criar Integração" • Base URL: <code>https://fgw.des.cluster1.node1.host:5076/B2BAPIs/svc</code></p>
+</div>
+
+<div class="body">
+
+  
+  <div class="legend">
+    <div class="leg"><div class="dot dot-entry"></div> Entrada do usuário</div>
+    <div class="leg"><div class="dot dot-api"></div> POST API</div>
+    <div class="leg"><div class="dot dot-get"></div> GET API</div>
+    <div class="leg"><div class="dot dot-ret"></div> Retorno usado como entrada da próxima etapa</div>
+    <div class="leg"><div class="dot dot-cond"></div> Condição / variação</div>
+  </div>
+
+  
+  <div class="root">🖱️ Botão "Criar Integração" → criarIntegracao() → criarIntegracaoGeral(tipoProduto, tipoConsumidor)</div>
+
+  
+  <div class="path-section">
+    <div class="path-title">⚙️ FLUXO PRINCIPAL — criarIntegracaoGeral() — cobre todos os tipos (NFS, AZURE, BROWSER)</div>
+    <div class="path-body">
+
+      
+      <div class="step">
+        <div class="step-num cond-num">0</div>
+        <div class="step-inner">
+          <div class="step-title">
+            <span>Preparação Local dos Nomes</span>
+            <span class="badge-method badge-local">LOCAL</span>
+          </div>
+          <p class="params-label">Entradas do formulário</p>
+          <table class="params">
+            <tr><th>Campo</th><th>Origem</th><th>Resultado</th></tr>
+            <tr><td class="field">produtor</td><td class="src">input#produtor</td><td class="val">Nome digitado pelo usuário</td></tr>
+            <tr><td class="field">consumidor</td><td class="src">input#consumidor</td><td class="val">Nome digitado pelo usuário</td></tr>
+            <tr><td class="field">cdIntegracao</td><td class="src">span#cdIntegracao</td><td class="val">Código gerado automaticamente (ex: XYZAB)</td></tr>
+            <tr><td class="field">agendamento</td><td class="src">input#agendamento</td><td class="val">Intervalo em minutos (ex: 5)</td></tr>
+            <tr><td class="field">chkAtivoZIP</td><td class="src">checkbox#chkAtivoZIP</td><td class="val">boolean — ativa sufixo _ZIP no template</td></tr>
+          </table>
+          <div class="return-box">
+            <strong>Variáveis derivadas:</strong><br />
+            <span class="ret-field">nomeProdutor</span> = produtor + "_" + cdIntegracao<br />
+            <span class="ret-field">nomeConsumidor</span> = consumidor + "_" + cdIntegracao<br />
+            <span class="ret-field">templateNameTXT</span> = "T_SIMPLES_INFRA_PROTOCOLO" (+ "_ZIP" se ZIP ativo)
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-inner">
+          <div class="step-title">
+            <span>Criar Trading Partner — Produtor</span>
+            <span class="badge-method badge-post">POST</span>
+          </div>
+          <div class="endpoint">/tradingpartners/</div>
+          <p class="params-label">Campos principais do payload</p>
+          <table class="params">
+            <tr><th>Campo</th><th>Valor</th><th>Origem</th></tr>
+            <tr><td class="field">partnerName</td><td class="val">nomeProdutor</td><td class="src">derivado local (etapa 0)</td></tr>
+            <tr><td class="field">username</td><td class="val">nomeProdutor</td><td class="src">derivado local</td></tr>
+            <tr><td class="field">givenName / surname</td><td class="val">nomeProdutor</td><td class="src">derivado local</td></tr>
+            <tr><td class="field">emailAddress</td><td class="val">nomeProdutor@teste.com</td><td class="src">derivado local</td></tr>
+            <tr><td class="field">community</td><td class="val">"host_COMUNIDADE01"</td><td class="src">fixo</td></tr>
+            <tr><td class="field">isInitiatingProducer</td><td class="val">true</td><td class="src">fixo</td></tr>
+            <tr><td class="field">password</td><td class="val">"123456"</td><td class="src">fixo</td></tr>
+          </table>
+          <div class="note"><strong>Tolerância:</strong> erro API000429 / API000232 = "já existe" → continua sem parar.</div>
+        </div>
+      </div>
+
+      
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-inner">
+          <div class="step-title">
+            <span>Criar Trading Partner — Consumidor</span>
+            <span class="badge-method badge-post">POST</span>
+            <span class="badge-method badge-cond">varia por tipoConsumidor</span>
+          </div>
+          <div class="endpoint">/tradingpartners/</div>
+          <table class="params">
+            <tr><th>Campo</th><th>Valor</th><th>Origem</th></tr>
+            <tr><td class="field">partnerName</td><td class="val">nomeConsumidor</td><td class="src">derivado local</td></tr>
+            <tr><td class="field">isListeningConsumer</td><td class="val">true (NFS/AZURE) | false (BROWSER)</td><td class="src">fixo por tipo</td></tr>
+            <tr><td class="field">isInitiatingConsumer</td><td class="val">false (NFS/AZURE) | true (BROWSER)</td><td class="src">fixo por tipo</td></tr>
+            <tr><td class="field">customProtocolName</td><td class="val">NFS: "host-fsa-extract-protocol" | AZURE: "host-azure-protocol" | BROWSER: removido</td><td class="src">fixo por tipo</td></tr>
+            <tr><td class="field">customProtocolExtensions</td><td class="val">String com 10+ parâmetros de roteamento (varia por tipo)</td><td class="src">montado com: destinoNfs, azureBucket, azureServicoObscure, etc.</td></tr>
+          </table>
+        </div>
+      </div>
+
+      
+      <div class="step">
+        <div class="step-num cond-num">2b</div>
+        <div class="step-inner">
+          <div class="step-title">
+            <span>Somente se tipoConsumidor = AZURE — Certificado CA</span>
+            <span class="badge-method badge-post">POST</span>
+          </div>
+          <div class="endpoint">/cadigitalcertificates/</div>
+          <table class="params">
+            <tr><th>Campo</th><th>Valor</th><th>Origem</th></tr>
+            <tr><td class="field">certName</td><td class="val">nomeConsumidor + "_" + azureHostTratado</td><td class="src">derivado local</td></tr>
+            <tr><td class="field">certData</td><td class="val">Base64 do arquivo .cer/.crt</td><td class="src">input#azureCACertificate → FileReader</td></tr>
+            <tr><td class="field">verifyAuthChain / verifyValidity</td><td class="val">false</td><td class="src">fixo</td></tr>
+          </table>
+        </div>
+      </div>
+
+      
+      <div class="step">
+        <div class="step-num cond-num">2c</div>
+        <div class="step-inner">
+          <div class="step-title">
+            <span>Somente se tipoConsumidor = AZURE — Obscure Parameter (SecretKey)</span>
+            <span class="badge-method badge-post">POST</span>
+          </div>
+          <div class="endpoint">/serviceinstances/</div>
+          <table class="params">
+            <tr><th>Campo</th><th>Valor</th><th>Origem</th></tr>
+            <tr><td class="field">serviceName</td><td class="val">azureServicoObscure = "CEF_Azure_Obscure_" + nomeConsumidor</td><td class="src">derivado local</td></tr>
+            <tr><td class="field">definitionName</td><td class="val">"ObscureParameter"</td><td class="src">fixo</td></tr>
+            <tr><td class="field">instParms</td><td class="val">obscureVal0: azureSecretKey, obscureName0: "secretkey"</td><td class="src">input#azureSecretKey</td></tr>
+          </table>
+        </div>
+      </div>
+
+      
+      <div class="step">
+        <div class="step-num cond-num">2d</div>
+        <div class="step-inner">
+          <div class="step-title">
+            <span>Somente se tipoConsumidor = AZURE — ObjectStore Adapter</span>
+            <span class="badge-method badge-post">POST</span>
+          </div>
+          <div class="endpoint">/serviceinstances/</div>
+          <table class="params">
+            <tr><th>Campo</th><th>Valor</th><th>Origem</th></tr>
+            <tr><td class="field">serviceName</td><td class="val">"CEF_Azure_" + azureHostTratado + "_" + nomeConsumidor</td><td class="src">derivado local</td></tr>
+            <tr><td class="field">serviceGroupName</td><td class="val">azureServicoGroup = "CEF_" + azureHost + "_" + nomeConsumidor + "_GRP"</td><td class="src">derivado local</td></tr>
+            <tr><td class="field">definitionName</td><td class="val">"ObjectStoreClientAdapter"</td><td class="src">fixo</td></tr>
+            <tr><td class="field">instParms → Endpoint</td><td class="val">azureHostParam</td><td class="src">input#azureURL</td></tr>
+            <tr><td class="field">instParms → BucketName</td><td class="val">azureBucketParam</td><td class="src">input#azureBucket</td></tr>
+            <tr><td class="field">instParms → CACertList.1</td><td class="val">certNameParam (retorno etapa 2b)</td><td class="src">← saída da etapa 2b</td></tr>
+          </table>
+          <div class="return-box"><span class="arrow">↩</span> <strong>Retorno da 2b usado aqui:</strong> <span class="ret-field">certNameParam</span> = nomeConsumidor + "_" + azureHostTratado</div>
+        </div>
+      </div>
+
+      
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-inner">
+          <div class="step-title">
+            <span>Criar Canal de Roteamento</span>
+            <span class="badge-method badge-post">POST</span>
+          </div>
+          <div class="endpoint">/routingchannels/</div>
+          <table class="params">
+            <tr><th>Campo</th><th>Valor</th><th>Origem</th></tr>
+            <tr><td class="field">producer</td><td class="val">nomeProdutor</td><td class="src">derivado local (etapa 0)</td></tr>
+            <tr><td class="field">consumer</td><td class="val">nomeConsumidor</td><td class="src">derivado local (etapa 0)</td></tr>
+            <tr><td class="field">templateName</td><td class="val">templateNameTXT (ex: T_SIMPLES_INFRA_PROTOCOLO)</td><td class="src">derivado local (etapa 0)</td></tr>
+            <tr><td class="field">provisioningFacts[0]</td><td class="val">myProdutorProtocolo: tipoProduto (NFS/AZURE/BROWSER)</td><td class="src">tipoOrigem (aba selecionada)</td></tr>
+            <tr><td class="field">provisioningFacts[1]</td><td class="val">myConsumidorProtocolo: tipoConsumidor</td><td class="src">tipoDestino (aba selecionada)</td></tr>
+          </table>
+        </div>
+      </div>
+
+      
+      <div class="step">
+        <div class="step-num get-num">4</div>
+        <div class="step-inner">
+          <div class="step-title">
+            <span>Obter Mailbox Path do Canal (somente se tipoProduto = NFS ou AZURE)</span>
+            <span class="badge-method badge-get">GET</span>
+          </div>
+          <div class="endpoint">/routingchannels/?searchByProducer=…&amp;searchByConsumer=…&amp;searchByTemplate=…</div>
+          <table class="params">
+            <tr><th>Query Param</th><th>Valor</th><th>Origem</th></tr>
+            <tr><td class="field">searchByProducer</td><td class="val">encodeURIComponent(nomeProdutor)</td><td class="src">etapa 0</td></tr>
+            <tr><td class="field">searchByConsumer</td><td class="val">encodeURIComponent(nomeConsumidor)</td><td class="src">etapa 0</td></tr>
+            <tr><td class="field">searchByTemplate</td><td class="val">templateNameTXT</td><td class="src">etapa 0</td></tr>
+          </table>
+          <div class="return-box">
+            <span class="arrow">↩</span> <strong>Retorno usado nas etapas 5 e 7:</strong><br />
+            <span class="ret-field">mailboxPath</span> = response[0].<span class="ret-field">producerMailboxPath</span><br />
+            <small style="color:#555">Exemplo: /Producao/NFS_PARCEIROS/produtor_XYZAB</small>
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-inner">
+          <div class="step-title">
+            <span>Criar FSA — FileSystem Adapter (somente tipoProduto = NFS)</span>
+            <span class="badge-method badge-post">POST</span>
+          </div>
+          <div class="endpoint">/serviceinstances/</div>
+          <table class="params">
+            <tr><th>Campo</th><th>Valor</th><th>Origem</th></tr>
+            <tr><td class="field">serviceName</td><td class="val">"CEF_FSA_COLLECT_" + nomeProdutor</td><td class="src">derivado local</td></tr>
+            <tr><td class="field">serviceGroupName</td><td class="val">"CEF_GRP_FSA_" + nomeProdutor</td><td class="src">derivado local</td></tr>
+            <tr><td class="field">definitionName</td><td class="val">"FileSystem"</td><td class="src">fixo</td></tr>
+            <tr><td class="field">instParms → collectionFolder</td><td class="val">origemNfs</td><td class="src">input#origemNfs</td></tr>
+            <tr><td class="field">instParms → userParm2</td><td class="val">mailboxPath</td><td class="src">← saída da etapa 4</td></tr>
+          </table>
+          <div class="return-box"><span class="arrow">↩</span> <strong>mailboxPath (etapa 4)</strong> é injetado em <span class="ret-field">instParms.userParm2</span></div>
+        </div>
+      </div>
+
+      
+      <div class="step">
+        <div class="step-num cond-num">5b</div>
+        <div class="step-inner">
+          <div class="step-title">
+            <span>Somente tipoProduto = AZURE — 3 chamadas extras</span>
+            <span class="badge-method badge-cond">AZURE</span>
+          </div>
+          <table class="params">
+            <tr><th>Ordem</th><th>Endpoint</th><th>Parâmetros-chave</th></tr>
+            <tr><td class="field">5b-1</td><td class="val">POST /cadigitalcertificates/</td><td class="src">certName = nomeProdutor+"_"+azureHostTratado | certData = Base64 arquivo</td></tr>
+            <tr><td class="field">5b-2</td><td class="val">POST /serviceinstances/ (ObscureParameter)</td><td class="src">serviceName = "CEF_Azure_Obscure_"+nomeProdutor | secretkey = azureSecretKey</td></tr>
+            <tr><td class="field">5b-3</td><td class="val">POST /serviceinstances/ (ObjectStoreClientAdapter)</td><td class="src">CACertList.1 = certNameParam (← etapa 5b-1) | Endpoint = azureURL | BucketName</td></tr>
+          </table>
+        </div>
+      </div>
+
+      
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-inner">
+          <div class="step-title">
+            <span>Criar Business Process — Coletor de Arquivos</span>
+            <span class="badge-method badge-post">POST</span>
+          </div>
+          <div class="endpoint">/workflows/</div>
+          <table class="params">
+            <tr><th>Campo</th><th>Valor</th><th>Origem</th></tr>
+            <tr><td class="field">name</td><td class="val">bpName = "CEF_FSA_COLLECT_" + nomeProdutor (NFS) ou "CEF_ColetorAzure_"+nomeProdutor (AZURE)</td><td class="src">derivado local</td></tr>
+            <tr><td class="field">businessProcess</td><td class="val">XML BPML com &lt;participant name="serviceNameTxt"/&gt;</td><td class="src">serviceNameTxt = derivado do nomeProdutor</td></tr>
+            <tr><td class="field">enableBusinessProcess</td><td class="val">true</td><td class="src">fixo</td></tr>
+            <tr><td class="field">queue / recoveryLevel</td><td class="val">6 / 3</td><td class="src">fixo</td></tr>
+          </table>
+          <div class="return-box"><span class="arrow">↩</span> <strong>bpName</strong> derivado do <span class="ret-field">nomeProdutor</span> (etapa 0) é reutilizado na etapa 7</div>
+        </div>
+      </div>
+
+      
+      <div class="step">
+        <div class="step-num">7</div>
+        <div class="step-inner">
+          <div class="step-title">
+            <span>Criar Schedule — Agendador de Coleta</span>
+            <span class="badge-method badge-post">POST</span>
+          </div>
+          <div class="endpoint">/schedules/</div>
+          <table class="params">
+            <tr><th>Campo</th><th>Valor</th><th>Origem</th></tr>
+            <tr><td class="field">businessProcess</td><td class="val">bpName</td><td class="src">← saída da etapa 6 (derivado)</td></tr>
+            <tr><td class="field">timerSchedule.minutes</td><td class="val">agendamento</td><td class="src">input#agendamento (etapa 0)</td></tr>
+            <tr><td class="field">bpNameValuePairs → MBX_Produtor (NFS)</td><td class="val">mailboxPath</td><td class="src">← saída da etapa 4 (GET)</td></tr>
+            <tr><td class="field">bpNameValuePairs → b2b_mbx_produtor (AZURE)</td><td class="val">mailboxPathProdutor</td><td class="src">← saída da etapa 4 (GET)</td></tr>
+            <tr><td class="field">bpNameValuePairs → azure_servico_grupo (AZURE)</td><td class="val">azureServicoGroup</td><td class="src">← derivado do azureURL + nomeProdutor</td></tr>
+            <tr><td class="field">bpNameValuePairs → azure_dir_origem (AZURE)</td><td class="val">prod_azure_pastaorigem</td><td class="src">input#prod-azure-pastaorigem</td></tr>
+            <tr><td class="field">runAsUser</td><td class="val">"admin"</td><td class="src">fixo</td></tr>
+          </table>
+          <div class="return-box"><span class="arrow">↩</span> <strong>mailboxPath (etapa 4)</strong> reutilizado como parâmetro BP <span class="ret-field">MBX_Produtor</span> / <span class="ret-field">b2b_mbx_produtor</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  
+  <div class="path-section">
+    <div class="path-title">🔗 ENCADEAMENTO DE RETORNOS — dado de saída → entrada da próxima API</div>
+    <div class="path-body">
+      <div class="step">
+        <div class="step-num get-num">↩</div>
+        <div class="step-inner">
+          <table class="params">
+            <tr><th>Etapa que gera</th><th>Campo retornado</th><th>Usado em</th><th>Como campo</th></tr>
+            <tr>
+              <td class="field">LOCAL (etapa 0)</td>
+              <td class="val">nomeProdutor = produtor + "_" + cdIntegracao</td>
+              <td class="src">Etapas 1, 3, 5, 5b, 6, 7</td>
+              <td class="val">partnerName, producer, serviceName, bpName, MBX_Produtor…</td>
+            </tr>
+            <tr>
+              <td class="field">LOCAL (etapa 0)</td>
+              <td class="val">nomeConsumidor = consumidor + "_" + cdIntegracao</td>
+              <td class="src">Etapas 2, 2b, 2c, 2d, 3</td>
+              <td class="val">partnerName, consumer, serviceName, certName…</td>
+            </tr>
+            <tr>
+              <td class="field">GET Etapa 4</td>
+              <td class="val">response[0].producerMailboxPath</td>
+              <td class="src">Etapa 5 (NFS) e Etapa 7</td>
+              <td class="val">instParms.userParm2 (FSA) e bpNameValuePairs.MBX_Produtor (Schedule)</td>
+            </tr>
+            <tr>
+              <td class="field">POST Etapa 2b (AZURE)</td>
+              <td class="val">certNameParam = nomeConsumidor + "_" + azureHostTratado</td>
+              <td class="src">Etapa 2d</td>
+              <td class="val">instParms.CACertList.1</td>
+            </tr>
+            <tr>
+              <td class="field">LOCAL (etapa 2d AZURE)</td>
+              <td class="val">azureServicoGroup = "CEF_" + azureHost + "_" + nomeConsumidor + "_GRP"</td>
+              <td class="src">Etapa 2 (customProtocolExtensions) e Etapa 7</td>
+              <td class="val">host_FG_Route_Azure_Objectstoreclientadapter e azure_servico_grupo</td>
+            </tr>
+            <tr>
+              <td class="field">LOCAL (etapa 6)</td>
+              <td class="val">bpName = "CEF_FSA_COLLECT_" + nomeProdutor</td>
+              <td class="src">Etapa 7</td>
+              <td class="val">businessProcess (campo no Schedule)</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="path-section">
+    <div class="path-title">📋 ORDEM DE EXECUÇÃO — visão rápida</div>
+    <div class="path-body">
+      <div class="step">
+        <div class="step-num cond-num">≡</div>
+        <div class="step-inner" style="padding:14px 16px">
+          <table class="params">
+            <tr><th>#</th><th>Chamada</th><th>Endpoint</th><th>Depende de</th></tr>
+            <tr><td class="field">0</td><td>Preparação local</td><td class="val">—</td><td class="src">Formulário</td></tr>
+            <tr><td class="field">1</td><td>Criar Produtor (Trading Partner)</td><td class="val">POST /tradingpartners/</td><td class="src">etapa 0</td></tr>
+            <tr><td class="field">2</td><td>Criar Consumidor (Trading Partner)</td><td class="val">POST /tradingpartners/</td><td class="src">etapa 0</td></tr>
+            <tr><td class="field">2b</td><td>[AZURE] Certificado CA Consumidor</td><td class="val">POST /cadigitalcertificates/</td><td class="src">etapa 0 + arquivo .cer</td></tr>
+            <tr><td class="field">2c</td><td>[AZURE] Obscure Param Consumidor</td><td class="val">POST /serviceinstances/</td><td class="src">etapa 0 + azureSecretKey</td></tr>
+            <tr><td class="field">2d</td><td>[AZURE] ObjectStore Adapter Consumidor</td><td class="val">POST /serviceinstances/</td><td class="src">etapa 2b (certName) + azureURL + azureBucket</td></tr>
+            <tr><td class="field">3</td><td>Criar Canal de Roteamento</td><td class="val">POST /routingchannels/</td><td class="src">etapas 0 + 1 + 2</td></tr>
+            <tr><td class="field">4</td><td>Buscar Mailbox Path</td><td class="val">GET /routingchannels/</td><td class="src">etapa 3 (canal precisa existir)</td></tr>
+            <tr><td class="field">5</td><td>[NFS] Criar FSA FileSystem Adapter</td><td class="val">POST /serviceinstances/</td><td class="src">etapa 4 (mailboxPath)</td></tr>
+            <tr><td class="field">5b-1</td><td>[AZURE Prod] Certificado CA Produtor</td><td class="val">POST /cadigitalcertificates/</td><td class="src">etapa 0</td></tr>
+            <tr><td class="field">5b-2</td><td>[AZURE Prod] Obscure Param Produtor</td><td class="val">POST /serviceinstances/</td><td class="src">etapa 0</td></tr>
+            <tr><td class="field">5b-3</td><td>[AZURE Prod] ObjectStore Adapter Produtor</td><td class="val">POST /serviceinstances/</td><td class="src">etapas 5b-1 (certName) + azureURL</td></tr>
+            <tr><td class="field">6</td><td>Criar Business Process (Workflow)</td><td class="val">POST /workflows/</td><td class="src">etapa 5 (serviceName)</td></tr>
+            <tr><td class="field">7</td><td>Criar Schedule (Agendador)</td><td class="val">POST /schedules/</td><td class="src">etapas 4 (mailboxPath) + 6 (bpName)</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  Powered by <span>IBM BOB</span>
+</footer>
+</body>
+</html>

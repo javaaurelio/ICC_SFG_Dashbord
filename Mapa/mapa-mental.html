@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapa Mental — criarIntegracao()</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4fb;color:#1e293b;font-size:13px;line-height:1.5;}
+
+.page-header{background:linear-gradient(90deg,#003f7a,#005CA9);color:#fff;padding:20px 32px 14px;}
+.page-header h1{font-size:1.45rem;font-weight:700;}
+.page-header p{font-size:.85rem;opacity:.85;margin-top:4px;}
+
+.body{padding:20px 24px 40px;max-width:1260px;margin:auto;}
+
+/* Tabs */
+.tabs-nav{display:flex;gap:0;flex-wrap:nowrap;margin-bottom:0;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.tabs-nav::-webkit-scrollbar{height:4px;}
+.tabs-nav::-webkit-scrollbar-thumb{background:#c8d4e8;border-radius:4px;}
+.tab-btn{
+  padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;
+  border:1px solid #dde3ec;border-bottom:none;border-radius:8px 8px 0 0;
+  background:#e4eaf5;color:#555;transition:background .15s;margin-right:4px;margin-bottom:0;
+  user-select:none;white-space:nowrap;flex-shrink:0;
+}
+.tab-btn.active{background:#fff;color:#005CA9;border-color:#dde3ec;border-bottom:2px solid #fff;z-index:1;}
+.tab-btn:hover:not(.active){background:#d8e2f5;}
+.tab-pane{display:none;border:1px solid #dde3ec;border-radius:0 8px 8px 8px;background:#fff;overflow:hidden;}
+.tab-pane.active{display:block;}
+
+/* Legend */
+.legend{display:flex;gap:14px;flex-wrap:wrap;padding:12px 20px;background:#f8faff;border-bottom:1px solid #eef2fb;}
+.leg{display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:#374151;}
+.dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
+
+/* Section */
+.section{padding:16px 20px 20px;}
+.section-title{
+  font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;
+  color:#005CA9;padding-bottom:8px;border-bottom:2px solid #e4eaf5;margin-bottom:0;margin-top:18px;
+}
+.section-title:first-child{margin-top:0;}
+
+/* Step */
+.steps{border:1px solid #e8edf5;border-radius:8px;overflow:hidden;margin-top:10px;}
+.step{display:grid;grid-template-columns:30px 1fr;border-bottom:1px solid #f0f3f8;}
+.step:last-child{border-bottom:none;}
+.sn{
+  font-size:11px;font-weight:800;display:flex;align-items:flex-start;
+  justify-content:center;padding-top:14px;color:#fff;min-height:50px;
+}
+.sn.post{background:#005CA9;} .sn.get{background:#0891b2;}
+.sn.local{background:#7c5cd8;} .sn.cond{background:#d97706;}
+.sn.nfs{background:#059669;} .sn.browser{background:#db2777;} .sn.azure{background:#ea580c;}
+
+.si{padding:11px 16px;}
+.stitle{font-weight:700;font-size:13px;color:#1e293b;display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:5px;}
+
+.bm{font-size:10px;font-weight:800;padding:2px 8px;border-radius:4px;letter-spacing:.3px;}
+.bm-post{background:#dbeafe;color:#1d4ed8;}
+.bm-get{background:#cffafe;color:#0e7490;}
+.bm-local{background:#f3e8ff;color:#7c3aed;}
+.bm-nfs{background:#d1fae5;color:#065f46;}
+.bm-browser{background:#fce7f3;color:#9d174d;}
+.bm-azure{background:#ffedd5;color:#9a3412;}
+.bm-cond{background:#fef3c7;color:#b45309;}
+
+.ep{
+  font-family:'Courier New',monospace;font-size:11.5px;color:#005CA9;font-weight:600;
+  background:#f0f7ff;padding:3px 9px;border-radius:4px;display:inline-block;margin-bottom:7px;
+}
+.ep.get{color:#0e7490;background:#ecfeff;}
+
+.pl{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin:8px 0 5px;}
+table.p{width:100%;border-collapse:collapse;font-size:11.5px;}
+table.p th{background:#f8faff;color:#374151;font-weight:700;padding:5px 8px;text-align:left;border-bottom:1px solid #e4eaf5;}
+table.p td{padding:4px 8px;border-bottom:1px solid #f0f3f8;vertical-align:top;}
+table.p tr:last-child td{border-bottom:none;}
+td.f{font-family:'Courier New',monospace;font-weight:700;color:#1e293b;white-space:nowrap;font-size:11px;}
+td.s{color:#7c5cd8;font-size:11px;}
+td.v{color:#374151;}
+
+.ret{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:7px 10px;margin-top:8px;font-size:11.5px;}
+.ret strong{color:#15803d;}
+.rf{font-family:'Courier New',monospace;font-weight:700;color:#166534;}
+
+.note{background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:6px 10px;margin-top:8px;font-size:11.5px;color:#78350f;}
+
+/* Chain */
+.chain-box{margin-top:10px;border:1px solid #e8edf5;border-radius:8px;overflow:hidden;}
+.chain-row{display:flex;align-items:flex-start;gap:10px;padding:9px 14px;border-bottom:1px solid #f0f3f8;font-size:12px;}
+.chain-row:last-child{border-bottom:none;}
+.chain-from{min-width:130px;font-weight:700;color:#005CA9;font-family:'Courier New',monospace;font-size:11px;padding-top:2px;}
+.chain-arrow{color:#16a34a;font-size:18px;font-weight:900;padding-top:0px;flex-shrink:0;}
+.chain-to{color:#374151;}
+.chain-to b{color:#7c5cd8;}
+
+footer{text-align:center;padding:14px;font-size:11px;color:#888;border-top:1px solid #dde3ec;background:#f0f3f8;margin-top:32px;}
+footer span{color:#005CA9;font-weight:600;}
+
+/* ── Conceitos ────────────────────────────────── */
+.concepts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-top:14px;}
+.concept-card{border-radius:10px;overflow:hidden;border:1px solid #e4eaf5;background:#fff;}
+.concept-header{padding:14px 18px 10px;display:flex;align-items:center;gap:10px;}
+.concept-icon{font-size:28px;line-height:1;}
+.concept-name{font-size:14px;font-weight:800;letter-spacing:.3px;}
+.concept-body{padding:0 18px 16px;font-size:12.5px;color:#374151;line-height:1.65;}
+.concept-body p{margin-bottom:8px;}
+.concept-body p:last-child{margin-bottom:0;}
+.concept-body ul{padding-left:16px;margin:6px 0;}
+.concept-body li{margin-bottom:4px;}
+.concept-body code{font-size:11px;background:#f0f5ff;padding:1px 5px;border-radius:3px;color:#1d4ed8;font-family:'Courier New',monospace;}
+.c-prod .concept-header{background:linear-gradient(135deg,#ecfdf5,#d1fae5);}
+.c-prod .concept-name{color:#065f46;}
+.c-cons .concept-header{background:linear-gradient(135deg,#fdf4ff,#f3e8ff);}
+.c-cons .concept-name{color:#6b21a8;}
+.c-tmpl .concept-header{background:linear-gradient(135deg,#eff6ff,#dbeafe);}
+.c-tmpl .concept-name{color:#1d4ed8;}
+.c-chan .concept-header{background:linear-gradient(135deg,#fff7ed,#fed7aa);}
+.c-chan .concept-name{color:#92400e;}
+.c-zip  .concept-header{background:linear-gradient(135deg,#fefce8,#fef9c3);}
+.c-zip  .concept-name{color:#713f12;}
+.c-mbx  .concept-header{background:linear-gradient(135deg,#f0f9ff,#e0f2fe);}
+.c-mbx  .concept-name{color:#075985;}
+
+.arch-box{margin-top:18px;background:#f8faff;border:1px solid #dde3ec;border-radius:10px;padding:20px 22px;}
+.arch-box h3{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:#005CA9;margin-bottom:14px;}
+.arch-flow{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap;}
+.arch-node{
+  background:#fff;border:2px solid #c8d4e8;border-radius:10px;
+  padding:12px 18px;text-align:center;min-width:120px;
+}
+.arch-node .an-icon{font-size:24px;}
+.arch-node .an-label{font-size:11px;font-weight:800;margin-top:4px;color:#374151;}
+.arch-node .an-sub{font-size:10px;color:#888;margin-top:2px;}
+.arch-node.prod{border-color:#059669;background:#f0fdf4;}
+.arch-node.tmpl{border-color:#005CA9;background:#eff6ff;}
+.arch-node.cons{border-color:#7c5cd8;background:#fdf4ff;}
+.arch-arrow{display:flex;flex-direction:column;align-items:center;padding:0 6px;}
+.arch-arrow .aa-line{width:40px;height:3px;background:linear-gradient(90deg,#059669,#7c5cd8);}
+.arch-arrow .aa-head{font-size:18px;color:#d97706;margin-top:-4px;line-height:1;}
+.arch-arrow .aa-label{font-size:10px;color:#555;font-weight:600;text-align:center;margin-top:3px;white-space:nowrap;}
+
+/* ── Como Usar ────────────────────────────────── */
+.howto-steps{counter-reset:hs;display:flex;flex-direction:column;gap:0;}
+.hs{display:grid;grid-template-columns:44px 1fr;border-bottom:1px solid #f0f3f8;}
+.hs:last-child{border-bottom:none;}
+.hs-num{
+  display:flex;align-items:flex-start;justify-content:center;
+  padding-top:16px;
+}
+.hs-num span{
+  width:28px;height:28px;border-radius:50%;
+  background:#005CA9;color:#fff;
+  font-size:13px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.hs-body{padding:14px 16px 14px 10px;}
+.hs-title{font-weight:800;font-size:13.5px;color:#1e293b;margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.hs-desc{font-size:12.5px;color:#374151;line-height:1.65;}
+.hs-desc ul{padding-left:16px;margin:6px 0 0;}
+.hs-desc li{margin-bottom:4px;}
+.hs-desc code{font-size:11px;background:#f0f5ff;padding:1px 5px;border-radius:3px;color:#1d4ed8;font-family:'Courier New',monospace;}
+.hs-tip{margin-top:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:6px 10px;font-size:11.5px;color:#166534;}
+.hs-warn{margin-top:8px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:6px 10px;font-size:11.5px;color:#78350f;}
+
+.proto-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:10px;}
+.proto-card{border-radius:8px;padding:12px 14px;border:1px solid #e4eaf5;font-size:12px;}
+.proto-card strong{display:block;margin-bottom:4px;font-size:12.5px;}
+.proto-card ul{padding-left:14px;margin:0;}
+.proto-card li{margin-bottom:3px;color:#374151;}
+.pc-nfs{background:#f0fdf4;border-color:#bbf7d0;} .pc-nfs strong{color:#065f46;}
+.pc-browser{background:#fdf4ff;border-color:#e9d5ff;} .pc-browser strong{color:#6b21a8;}
+.pc-azure{background:#fff7ed;border-color:#fed7aa;} .pc-azure strong{color:#92400e;}
+
+.flow-bar{display:flex;align-items:center;gap:0;flex-wrap:wrap;margin:14px 0 6px;justify-content:center;}
+.fb-node{background:#fff;border:2px solid #c8d4e8;border-radius:8px;padding:8px 14px;text-align:center;font-size:12px;font-weight:700;color:#374151;min-width:90px;}
+.fb-node.active-node{border-color:#005CA9;background:#eff6ff;color:#005CA9;}
+.fb-arr{color:#94a3b8;font-size:18px;padding:0 4px;}
+
+.tmpl-wrap{margin-top:14px;overflow-x:auto;border:1px solid #dbeafe;border-radius:8px;}
+.tmpl-box{width:100%;border-collapse:collapse;font-size:12px;min-width:520px;}
+.tmpl-box thead th{background:#eff6ff;font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:#1d4ed8;padding:7px 12px;text-align:left;border-bottom:1px solid #dbeafe;}
+.tmpl-box tbody td{padding:7px 12px;border-bottom:1px solid #f0f3f8;vertical-align:top;}
+.tmpl-box tbody tr:last-child td{border-bottom:none;}
+.tmpl-name{font-family:'Courier New',monospace;font-weight:700;color:#1d4ed8;font-size:11px;white-space:nowrap;}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🗺️ Mapa Mental — criarIntegracao()</h1>
+  <p>Fluxo completo de chamadas de API · NFS · BROWSER · AZURE · Base URL: https://fgw.des.cluster1.node1.host:5076/B2BAPIs/svc</p>
+</div>
+
+<div class="body">
+
+  <div class="tabs-nav">
+    <div class="tab-btn active"  onclick="showTab('concepts')">💡 Conceitos</div>
+    <div class="tab-btn"         onclick="showTab('howto')">🧭 Como Usar</div>
+    <div class="tab-btn"         onclick="showTab('overview')">📋 Visão Geral</div>
+    <div class="tab-btn"         onclick="showTab('nfs')">🟢 Consumidor NFS</div>
+    <div class="tab-btn"         onclick="showTab('browser')">🟣 Consumidor BROWSER</div>
+    <div class="tab-btn"         onclick="showTab('azure')">🟠 Consumidor AZURE</div>
+    <div class="tab-btn"         onclick="showTab('prod-azure')">☁️ Produtor AZURE</div>
+    <div class="tab-btn"         onclick="showTab('chain')">🔗 Encadeamento</div>
+  </div>
+
+  <!-- ═══════════════ CONCEITOS ═══════════════ -->
+  <div class="tab-pane active" id="tab-concepts">
+    <div class="section">
+
+      <!-- Diagrama de arquitetura -->
+      <div class="arch-box">
+        <h3>Como os componentes se conectam</h3>
+        <div class="arch-flow">
+          <div class="arch-node prod">
+            <div class="an-icon">🏭</div>
+            <div class="an-label">PRODUTOR</div>
+            <div class="an-sub">envia arquivos</div>
+          </div>
+          <div class="arch-arrow">
+            <div class="aa-line"></div>
+            <div class="aa-head">➜</div>
+            <div class="aa-label">Trading Partner<br>+ Protocolo</div>
+          </div>
+          <div class="arch-node tmpl">
+            <div class="an-icon">📐</div>
+            <div class="an-label">TEMPLATE</div>
+            <div class="an-sub">regras do canal</div>
+          </div>
+          <div class="arch-arrow">
+            <div class="aa-line"></div>
+            <div class="aa-head">➜</div>
+            <div class="aa-label">Canal de<br>Roteamento</div>
+          </div>
+          <div class="arch-node tmpl" style="border-color:#d97706;background:#fff7ed;">
+            <div class="an-icon">🔀</div>
+            <div class="an-label">CANAL</div>
+            <div class="an-sub">liga os três</div>
+          </div>
+          <div class="arch-arrow">
+            <div class="aa-line"></div>
+            <div class="aa-head">➜</div>
+            <div class="aa-label">Entrega<br>conforme template</div>
+          </div>
+          <div class="arch-node cons">
+            <div class="an-icon">📦</div>
+            <div class="an-label">CONSUMIDOR</div>
+            <div class="an-sub">recebe arquivos</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cards de conceitos -->
+      <div class="concepts-grid" style="margin-top:20px;">
+
+        <!-- PRODUTOR -->
+        <div class="concept-card c-prod">
+          <div class="concept-header">
+            <div class="concept-icon">🏭</div>
+            <div class="concept-name">Produtor (Trading Partner)</div>
+          </div>
+          <div class="concept-body">
+            <p><strong>Quem produz os dados.</strong> É o sistema ou parceiro que <em>origina</em> os arquivos e os entrega ao SFG para distribuição.</p>
+            <p>No SFG ele é cadastrado como um <strong>Trading Partner</strong> com flag <code>isInitiatingProducer = true</code>. Isso significa que ele toma a iniciativa de enviar — seja colocando arquivos em um diretório NFS, enviando via SFTP, CD ou Azure.</p>
+            <ul>
+              <li>Tem um <strong>mailbox</strong> (host de entrada) criado automaticamente pelo canal</li>
+              <li>O <strong>FSA (FileSystem Adapter)</strong> fica de olho na pasta de origem e, quando encontra arquivo, deposita no mailbox do produtor</li>
+              <li>O <strong>Schedule</strong> define o intervalo de coleta (ex: a cada 5 minutos)</li>
+            </ul>
+            <p>No código: <code>partnerName = produtor + "_" + cdIntegracao</code></p>
+          </div>
+        </div>
+
+        <!-- CONSUMIDOR -->
+        <div class="concept-card c-cons">
+          <div class="concept-header">
+            <div class="concept-icon">📦</div>
+            <div class="concept-name">Consumidor (Trading Partner)</div>
+          </div>
+          <div class="concept-body">
+            <p><strong>Quem recebe os dados.</strong> É o sistema ou parceiro que <em>consome</em> os arquivos produzidos — seja gravando num diretório NFS, num bucket Azure ou disponibilizando via portal Browser.</p>
+            <p>No SFG ele é cadastrado como Trading Partner com flag <code>isListeningConsumer = true</code> (NFS/AZURE) ou <code>isInitiatingConsumer = true</code> (BROWSER — ele que "puxa").</p>
+            <ul>
+              <li><strong>NFS:</strong> o SFG extrai o arquivo para o diretório informado em <code>customProtocolExtensions</code></li>
+              <li><strong>BROWSER:</strong> o parceiro acessa o portal e baixa manualmente</li>
+              <li><strong>AZURE:</strong> o SFG envia para um bucket via ObjectStore Adapter</li>
+            </ul>
+            <p>No código: <code>partnerName = consumidor + "_" + cdIntegracao</code></p>
+          </div>
+        </div>
+
+        <!-- TEMPLATE -->
+        <div class="concept-card c-tmpl">
+          <div class="concept-header">
+            <div class="concept-icon">📐</div>
+            <div class="concept-name">Template de Integração</div>
+          </div>
+          <div class="concept-body">
+            <p><strong>O modelo que define as regras do canal.</strong> É um artefato pré-criado no SFG que diz como o arquivo vai ser roteado — quais protocolos são aceitos, como o arquivo é processado, etc.</p>
+            <p>Os templates usados neste sistema:</p>
+            <div class="tmpl-wrap">
+              <table class="tmpl-box">
+                <thead>
+                  <tr><th>Template</th><th>Quando usar</th><th>ZIP</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="tmpl-name">T_SIMPLES_INFRA_PROTOCOLO</td>
+                    <td>Fluxo padrão com protocolo dinâmico (NFS, BROWSER, AZURE)</td>
+                    <td style="white-space:nowrap;">—</td>
+                  </tr>
+                  <tr>
+                    <td class="tmpl-name">T_SIMPLES_INFRA_PROTOCOLO_ZIP</td>
+                    <td>Igual ao acima, mas <strong>comprime o arquivo em ZIP</strong> antes de entregar ao consumidor</td>
+                    <td style="white-space:nowrap;">✅ Ativo quando <code>chkAtivoZIP = true</code></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p style="margin-top:10px;">O template é informado no canal pelo campo <code>templateName</code>. Os <code>provisioningFacts</code> passam o tipo do protocolo (NFS, BROWSER, AZURE) para que o template saiba como rotear.</p>
+          </div>
+        </div>
+
+        <!-- CANAL -->
+        <div class="concept-card c-chan">
+          <div class="concept-header">
+            <div class="concept-icon">🔀</div>
+            <div class="concept-name">Canal de Roteamento</div>
+          </div>
+          <div class="concept-body">
+            <p><strong>O componente que faz a ligação entre Produtor, Template e Consumidor.</strong> Sem o canal, o produtor e o consumidor existem mas não há fluxo entre eles.</p>
+            <p>Ao criar o canal via <code>POST /routingchannels/</code>, o SFG:</p>
+            <ul>
+              <li>Cria automaticamente um <strong>mailbox</strong> para o produtor (caminho derivado do template)</li>
+              <li>Aplica as <strong>regras do template</strong> escolhido</li>
+              <li>Associa os <code>provisioningFacts</code> que determinam qual BP será executado para entregar ao consumidor</li>
+            </ul>
+            <p>O <strong>mailboxPath</strong> gerado pelo canal é retornado via <code>GET /routingchannels/</code> e é essencial para configurar o FSA (agendador de coleta) — é por ele que o produtor deposita os arquivos.</p>
+            <p>Resumo: <em>Produtor deposita no mailbox → Template roteia → Consumidor recebe.</em></p>
+          </div>
+        </div>
+
+        <!-- ZIP -->
+        <div class="concept-card c-zip">
+          <div class="concept-header">
+            <div class="concept-icon">🗜️</div>
+            <div class="concept-name">Opção ZIP</div>
+          </div>
+          <div class="concept-body">
+            <p><strong>Comprime o arquivo em ZIP antes de entregá-lo ao consumidor.</strong> Ativado pelo checkbox <code>chkAtivoZIP</code> no formulário.</p>
+            <p>Quando marcado, o sufixo <code>_ZIP</code> é adicionado ao nome do template:</p>
+            <p style="text-align:center;"><code>T_SIMPLES_INFRA_PROTOCOLO</code> → <code>T_SIMPLES_INFRA_PROTOCOLO_ZIP</code></p>
+            <p>Isso faz com que o SFG aplique um BP de compressão antes de rotear o arquivo para o destino. O produtor não precisa saber disso — ele envia o arquivo normalmente. A compressão acontece <em>dentro</em> do SFG.</p>
+            <p>No código: <code>if (chkAtivoZIP) templateNameTXT += "_ZIP"</code></p>
+          </div>
+        </div>
+
+        <!-- MAILBOX -->
+        <div class="concept-card c-mbx">
+          <div class="concept-header">
+            <div class="concept-icon">📬</div>
+            <div class="concept-name">Mailbox (host do Produtor)</div>
+          </div>
+          <div class="concept-body">
+            <p><strong>Área de staging dentro do SFG onde o arquivo fica temporariamente</strong> antes de ser entregue ao consumidor.</p>
+            <p>O mailbox é criado automaticamente quando o canal é criado. O caminho (<code>producerMailboxPath</code>) é obtido via <code>GET /routingchannels/</code> logo após a criação do canal.</p>
+            <p>Esse caminho é usado em dois lugares:</p>
+            <ul>
+              <li><strong>FSA (FileSystem Adapter):</strong> campo <code>instParms.userParm2</code> — o FSA deposita o arquivo aqui</li>
+              <li><strong>Schedule:</strong> campo <code>MBX_Produtor</code> — o agendador sabe onde procurar o arquivo</li>
+            </ul>
+            <p>Exemplo de valor: <code>/Producao/NFS_PARCEIROS/produtor_XYZAB</code></p>
+          </div>
+        </div>
+
+      </div><!-- /concepts-grid -->
+    </div>
+  </div>
+
+  <!-- ═══════════════ COMO USAR ═══════════════ -->
+  <div class="tab-pane" id="tab-howto">
+    <div class="section">
+
+      <!-- barra de fluxo macro -->
+      <div class="flow-bar">
+        <div class="fb-node active-node">1. Produtor</div>
+        <div class="fb-arr">→</div>
+        <div class="fb-node active-node">2. Protocolo</div>
+        <div class="fb-arr">→</div>
+        <div class="fb-node active-node">3. Consumidor</div>
+        <div class="fb-arr">→</div>
+        <div class="fb-node active-node">4. Protocolo</div>
+        <div class="fb-arr">→</div>
+        <div class="fb-node active-node">5. ZIP?</div>
+        <div class="fb-arr">→</div>
+        <div class="fb-node" style="border-color:#16a34a;background:#f0fdf4;color:#15803d;">✅ Criar</div>
+      </div>
+
+      <div class="section-title">Passo a passo para criar uma integração</div>
+      <div class="steps howto-steps">
+
+        <!-- PASSO 1 -->
+        <div class="hs">
+          <div class="hs-num"><span>1</span></div>
+          <div class="hs-body">
+            <div class="hs-title">📤 Informe o Nome do Produtor</div>
+            <div class="hs-desc">
+              <p>No card <strong>Produtor</strong> (lado esquerdo da tela), preencha o campo <strong>"Nome Produtor"</strong> com o identificador do sistema ou parceiro que vai enviar os arquivos.</p>
+              <ul>
+                <li>Use somente letras, números e underline. Sem espaços.</li>
+                <li>Exemplo: <code>ARMEX</code>, <code>FGTS</code>, <code>SISTEMA_XYZ</code></li>
+                <li>Clique em <strong>Check</strong> para verificar se o nome já está em uso no SFG. Se aparecer ✅ "Disponível", está pronto para continuar.</li>
+              </ul>
+              <div class="hs-tip">💡 O nome final cadastrado no SFG será <code>SISTEMA_XYZ_&lt;código&gt;</code> — o código de integração é adicionado automaticamente.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PASSO 2 -->
+        <div class="hs">
+          <div class="hs-num"><span>2</span></div>
+          <div class="hs-body">
+            <div class="hs-title">🔌 Escolha o Protocolo do Produtor e preencha os campos</div>
+            <div class="hs-desc">
+              <p>Selecione a aba do protocolo pelo qual o Produtor vai <strong>enviar</strong> os arquivos:</p>
+              <div class="proto-grid">
+                <div class="proto-card pc-nfs">
+                  <strong>🟢 NFS</strong>
+                  <ul>
+                    <li><strong>Pasta Origem:</strong> caminho completo no NFS onde o Produtor depositará os arquivos<br><code>/NFS/PARCEIROS/SISTEMA_ORI</code></li>
+                    <li><strong>Agendar a cada:</strong> intervalo de coleta em minutos (padrão: 5)</li>
+                    <li>Clique <strong>Check</strong> para validar o caminho</li>
+                  </ul>
+                </div>
+                <div class="proto-card pc-browser">
+                  <strong>🟣 Browser</strong>
+                  <ul>
+                    <li>Sem campos extras — o Produtor envia acessando o portal web</li>
+                    <li>As credenciais de acesso (login/senha) são exibidas automaticamente após preencher o nome do Produtor</li>
+                  </ul>
+                </div>
+                <div class="proto-card pc-azure">
+                  <strong>🟠 Azure</strong>
+                  <ul>
+                    <li><strong>EndPoint URL:</strong> URL do storage Azure</li>
+                    <li><strong>Bucket Name:</strong> nome do container/bucket</li>
+                    <li><strong>SecretKey:</strong> chave de acesso</li>
+                    <li><strong>CA Certificate:</strong> arquivo .cer/.crt do certificado</li>
+                    <li><strong>Pasta Origem:</strong> diretório de coleta no bucket</li>
+                    <li><strong>Pasta Arquivado:</strong> diretório para mover após coleta</li>
+                    <li><strong>Agendar a cada:</strong> intervalo em minutos</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="hs-warn">⚠️ SFTP e CD estão disponíveis na interface mas ainda não implementados nesta versão.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PASSO 3 -->
+        <div class="hs">
+          <div class="hs-num"><span>3</span></div>
+          <div class="hs-body">
+            <div class="hs-title">📥 Informe o Nome do Consumidor</div>
+            <div class="hs-desc">
+              <p>No card <strong>Consumidor</strong> (lado direito da tela), preencha o campo <strong>"Nome Consumidor"</strong> com o identificador do sistema ou parceiro que vai <strong>receber</strong> os arquivos.</p>
+              <ul>
+                <li>Mesmas regras de nome do Produtor: sem espaços, sem caracteres especiais.</li>
+                <li>Clique em <strong>Check</strong> para verificar disponibilidade.</li>
+              </ul>
+              <div class="hs-tip">💡 O checkbox <strong>ZIP</strong> fica logo abaixo do nome do consumidor. Marque-o se quiser que o arquivo seja comprimido em ZIP <em>antes</em> de chegar ao consumidor.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PASSO 4 -->
+        <div class="hs">
+          <div class="hs-num"><span>4</span></div>
+          <div class="hs-body">
+            <div class="hs-title">🔌 Escolha o Protocolo do Consumidor e preencha os campos</div>
+            <div class="hs-desc">
+              <p>Selecione a aba do protocolo pelo qual o Consumidor vai <strong>receber</strong> os arquivos:</p>
+              <div class="proto-grid">
+                <div class="proto-card pc-nfs">
+                  <strong>🟢 NFS</strong>
+                  <ul>
+                    <li><strong>Pasta Destino:</strong> caminho completo no NFS onde o SFG vai entregar os arquivos<br><code>/NFS/PARCEIROS/SISTEMA_DEST</code></li>
+                    <li>Clique <strong>Check</strong> para validar o caminho</li>
+                  </ul>
+                </div>
+                <div class="proto-card pc-browser">
+                  <strong>🟣 Browser</strong>
+                  <ul>
+                    <li>Sem campos extras — o Consumidor baixa os arquivos acessando o portal web</li>
+                    <li>As credenciais de acesso são exibidas automaticamente após preencher o nome do Consumidor</li>
+                  </ul>
+                </div>
+                <div class="proto-card pc-azure">
+                  <strong>🟠 Azure</strong>
+                  <ul>
+                    <li><strong>EndPoint URL:</strong> URL do storage Azure de destino</li>
+                    <li><strong>Bucket Name:</strong> nome do container de destino</li>
+                    <li><strong>Pasta Destino:</strong> subdiretório dentro do bucket</li>
+                    <li><strong>SecretKey:</strong> chave de acesso</li>
+                    <li><strong>CA Certificate:</strong> arquivo .cer/.crt</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PASSO 5 -->
+        <div class="hs">
+          <div class="hs-num"><span>5</span></div>
+          <div class="hs-body">
+            <div class="hs-title">🗜️ ZIP (opcional) — marque se quiser compressão</div>
+            <div class="hs-desc">
+              <p>O checkbox <strong>ZIP</strong> está no card do Consumidor, logo abaixo do nome. Se marcado, o SFG comprime o arquivo antes de entregá-lo ao destino.</p>
+              <ul>
+                <li>O Produtor não precisa fazer nada diferente — a compressão acontece dentro do SFG</li>
+                <li>Internamente o template muda de <code>T_SIMPLES_INFRA_PROTOCOLO</code> para <code>T_SIMPLES_INFRA_PROTOCOLO_ZIP</code></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- PASSO 6 -->
+        <div class="hs">
+          <div class="hs-num" style="padding-top:16px;"><span style="background:#16a34a;">✓</span></div>
+          <div class="hs-body">
+            <div class="hs-title" style="color:#15803d;">✅ Clique em "Criar Integração"</div>
+            <div class="hs-desc">
+              <p>Com todos os campos preenchidos, clique no botão verde <strong>"✅ Criar Integração"</strong> no centro da tela, entre os dois cards.</p>
+              <ul>
+                <li>Um spinner de carregamento aparece enquanto as APIs são chamadas em sequência</li>
+                <li>Se tudo der certo, um pop-up verde de <strong>Sucesso</strong> é exibido</li>
+                <li>Se houver erro (campo inválido, serviço indisponível etc.), um pop-up vermelho mostra o detalhe do problema</li>
+              </ul>
+              <div class="hs-tip">💡 Após criar, o código da integração fica visível no topo da página (ex: <code>XYZAB</code>). Guarde esse código — ele identifica a integração no SFG.</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /howto-steps -->
+
+      <!-- Tabela resumo de campos por protocolo -->
+      <div class="section-title" style="margin-top:22px;">Resumo — campos obrigatórios por protocolo</div>
+      <div style="overflow-x:auto;margin-top:10px;border:1px solid #e4eaf5;border-radius:8px;">
+        <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:560px;">
+          <thead>
+            <tr style="background:#f8faff;">
+              <th style="padding:8px 12px;text-align:left;border-bottom:1px solid #e4eaf5;font-weight:800;color:#374151;">Lado</th>
+              <th style="padding:8px 12px;text-align:left;border-bottom:1px solid #e4eaf5;font-weight:800;color:#059669;">🟢 NFS</th>
+              <th style="padding:8px 12px;text-align:left;border-bottom:1px solid #e4eaf5;font-weight:800;color:#6b21a8;">🟣 Browser</th>
+              <th style="padding:8px 12px;text-align:left;border-bottom:1px solid #e4eaf5;font-weight:800;color:#ea580c;">🟠 Azure</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid #f0f3f8;">
+              <td style="padding:7px 12px;font-weight:700;">Produtor</td>
+              <td style="padding:7px 12px;">Nome · Pasta Origem · Agendamento</td>
+              <td style="padding:7px 12px;">Nome (credenciais automáticas)</td>
+              <td style="padding:7px 12px;">Nome · EndPoint · Bucket · SecretKey · Certificado CA · Pasta Origem · Pasta Arquivado · Agendamento</td>
+            </tr>
+            <tr>
+              <td style="padding:7px 12px;font-weight:700;">Consumidor</td>
+              <td style="padding:7px 12px;">Nome · Pasta Destino</td>
+              <td style="padding:7px 12px;">Nome (credenciais automáticas)</td>
+              <td style="padding:7px 12px;">Nome · EndPoint · Bucket · Pasta Destino · SecretKey · Certificado CA</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════ VISÃO GERAL ═══════════════ -->
+  <div class="tab-pane" id="tab-overview">
+    <div class="legend">
+      <div class="leg"><div class="dot" style="background:#7c5cd8"></div>Local/derivado</div>
+      <div class="leg"><div class="dot" style="background:#005CA9"></div>POST API</div>
+      <div class="leg"><div class="dot" style="background:#0891b2"></div>GET API</div>
+      <div class="leg"><div class="dot" style="background:#16a34a"></div>Retorno → próxima etapa</div>
+      <div class="leg"><div class="dot" style="background:#d97706"></div>Condicional por tipo</div>
+    </div>
+    <div class="section">
+      <div class="section-title">Ordem de execução — todos os tipos</div>
+      <div class="steps">
+        <div class="step"><div class="sn local">0</div><div class="si">
+          <div class="stitle"><span>Preparação Local</span><span class="bm bm-local">LOCAL</span></div>
+          <table class="p" style="margin-top:4px;">
+            <tr><th>Variável</th><th>Valor</th><th>Origem</th></tr>
+            <tr><td class="f">nomeProdutor</td><td class="v">produtor + "_" + cdIntegracao</td><td class="s">inputs #produtor + #cdIntegracao</td></tr>
+            <tr><td class="f">nomeConsumidor</td><td class="v">consumidor + "_" + cdIntegracao</td><td class="s">inputs #consumidor + #cdIntegracao</td></tr>
+            <tr><td class="f">templateNameTXT</td><td class="v">"T_SIMPLES_INFRA_PROTOCOLO" (base)</td><td class="s">fixo</td></tr>
+            <tr><td class="f">templateNameTXT (ZIP)</td><td class="v">"T_SIMPLES_INFRA_PROTOCOLO_ZIP" — quando <code>chkAtivoZIP = true</code></td><td class="s">checkbox #chkAtivoZIP</td></tr>
+            <tr><td class="f">agendamento</td><td class="v">número inteiro em minutos (ex: 5)</td><td class="s">input #agendamento</td></tr>
+          </table>
+        </div></div>
+        <div class="step"><div class="sn post">1</div><div class="si">
+          <div class="stitle"><span>Criar Trading Partner — Produtor</span><span class="bm bm-post">POST</span></div>
+          <div class="ep">POST /tradingpartners/</div>
+          <p><code>partnerName = nomeProdutor</code> · <code>isInitiatingProducer = true</code> · <code>community = host_COMUNIDADE01</code></p>
+        </div></div>
+        <div class="step"><div class="sn post">2</div><div class="si">
+          <div class="stitle"><span>Criar Trading Partner — Consumidor</span><span class="bm bm-post">POST</span><span class="bm bm-cond">varia por tipo</span></div>
+          <div class="ep">POST /tradingpartners/</div>
+          <p><b>NFS:</b> customProtocolName "host-fsa-extract-protocol" + 10 parâmetros com destinoNfs<br>
+          <b>BROWSER:</b> isInitiatingConsumer=true, sem customProtocol<br>
+          <b>AZURE:</b> customProtocolName "host-azure-protocol" + bucket, obscure, serviceGroup</p>
+        </div></div>
+        <div class="step"><div class="sn cond">2+</div><div class="si">
+          <div class="stitle"><span>Extras somente AZURE Consumidor</span><span class="bm bm-azure">AZURE</span></div>
+          <p>2b → POST /cadigitalcertificates/ &nbsp;|&nbsp; 2c → POST /serviceinstances/ (ObscureParam) &nbsp;|&nbsp; 2d → POST /serviceinstances/ (ObjectStoreAdapter)</p>
+        </div></div>
+        <div class="step"><div class="sn post">3</div><div class="si">
+          <div class="stitle"><span>Criar Canal de Roteamento</span><span class="bm bm-post">POST</span></div>
+          <div class="ep">POST /routingchannels/</div>
+          <p><code>producer = nomeProdutor</code> · <code>consumer = nomeConsumidor</code> · <code>templateName</code> · <code>provisioningFacts</code> com tipoProduto e tipoConsumidor</p>
+        </div></div>
+        <div class="step"><div class="sn get">4</div><div class="si">
+          <div class="stitle"><span>Buscar Mailbox Path do Canal</span><span class="bm bm-get">GET</span></div>
+          <div class="ep get">GET /routingchannels/?searchByProducer=…&searchByConsumer=…&searchByTemplate=…</div>
+          <div class="ret"><strong>↩ Retorno:</strong> <span class="rf">producerMailboxPath</span> → usado nas etapas 5 (FSA instParms.userParm2) e 7 (Schedule MBX_Produtor)</div>
+        </div></div>
+        <div class="step"><div class="sn cond">5</div><div class="si">
+          <div class="stitle"><span>Serviços do Produtor</span><span class="bm bm-cond">condicional por tipoProduto</span></div>
+          <p><b>NFS:</b> POST /serviceinstances/ (FSA FileSystem Adapter) — usa mailboxPath da etapa 4<br>
+          <b>AZURE:</b> POST CACert + ObscureParam + ObjectStore + GET novo mailboxPath + BP Coletor Azure</p>
+        </div></div>
+        <div class="step"><div class="sn post">6</div><div class="si">
+          <div class="stitle"><span>Criar Business Process (Workflow)</span><span class="bm bm-post">POST</span></div>
+          <div class="ep">POST /workflows/</div>
+          <p>BPML XML com participante FSA · <code>bpName = "CEF_FSA_COLLECT_"+nomeProdutor</code></p>
+          <div class="ret"><strong>↩ bpName</strong> → campo <span class="rf">businessProcess</span> no Schedule (etapa 7)</div>
+        </div></div>
+        <div class="step"><div class="sn post">7</div><div class="si">
+          <div class="stitle"><span>Criar Schedule (Agendador)</span><span class="bm bm-post">POST</span></div>
+          <div class="ep">POST /schedules/</div>
+          <p>Usa <span class="rf">bpName</span> (← et.6) · <span class="rf">mailboxPath</span> (← et.4) · <code>agendamento</code> em minutos</p>
+        </div></div>
+      </div>
+
+      <div class="section-title">Comparativo rápido por tipo de Consumidor</div>
+      <div class="chain-box">
+        <table class="p" style="font-size:12px;">
+          <tr><th>Etapa</th><th>🟢 NFS</th><th>🟣 BROWSER</th><th>🟠 AZURE</th></tr>
+          <tr><td class="f">2 — Trading Partner</td><td>customProtocol FSA + destinoNfs</td><td>sem customProtocol · isInitiating=true</td><td>customProtocol Azure + bucket + obscure</td></tr>
+          <tr><td class="f">Extras Consumidor</td><td>—</td><td>—</td><td>2b CACert · 2c ObscureParam · 2d ObjectStore</td></tr>
+          <tr><td class="f">5 — Produtor</td><td>FSA + mailboxPath</td><td>FSA + mailboxPath</td><td>CACert + Obscure + ObjectStore + ColetorBP</td></tr>
+          <tr><td class="f">7 — Schedule param</td><td>MBX_Produtor = mailboxPath</td><td>MBX_Produtor = mailboxPath</td><td>b2b_mbx_produtor · azure_servico_grupo · azure_dir_origem</td></tr>
+          <tr><td class="f">Total chamadas API</td><td>6</td><td>6</td><td>10 ~ 11</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ NFS ═══════════════ -->
+  <div class="tab-pane" id="tab-nfs">
+    <div class="legend"><div class="leg"><div class="dot" style="background:#059669"></div>Fluxo NFS — Consumidor</div></div>
+    <div class="section">
+      <div class="section-title">Etapa 2 — POST /tradingpartners/ — Consumidor NFS</div>
+      <div class="steps">
+        <div class="step"><div class="sn nfs">2</div><div class="si">
+          <div class="stitle"><span>Criar Trading Partner Consumidor NFS</span><span class="bm bm-post">POST</span><span class="bm bm-nfs">NFS</span></div>
+          <div class="ep">POST /tradingpartners/</div>
+          <table class="p">
+            <tr><th>Campo</th><th>Valor</th><th>Origem</th></tr>
+            <tr><td class="f">partnerName / username</td><td class="v">nomeConsumidor</td><td class="s">etapa 0</td></tr>
+            <tr><td class="f">isListeningConsumer</td><td class="v">true</td><td class="s">fixo</td></tr>
+            <tr><td class="f">isInitiatingConsumer</td><td class="v">false</td><td class="s">fixo</td></tr>
+            <tr><td class="f">customProtocolName</td><td class="v">"host-fsa-extract-protocol"</td><td class="s">fixo NFS</td></tr>
+            <tr><td class="f">customProtocolExtensions</td><td class="v">String com 10 parâmetros (abaixo)</td><td class="s">montado localmente</td></tr>
+          </table>
+          <div class="pl">customProtocolExtensions — parâmetros</div>
+          <table class="p">
+            <tr><th>Parâmetro</th><th>Valor</th><th>Origem</th></tr>
+            <tr><td class="f">host_AFTRouteViaExtractFSA_EMAIL_SUCESSO</td><td class="v">YES</td><td class="s">fixo</td></tr>
+            <tr><td class="f">host_AFTRouteViaExtractFSA_EMAIL_ERRO</td><td class="v">NO</td><td class="s">fixo</td></tr>
+            <tr><td class="f">host_AFTRouteViaExtractFSA_PREFIX_LOG</td><td class="v">SIXPT_CUSTOM</td><td class="s">fixo</td></tr>
+            <tr><td class="f">PROTOCOLBPNAME</td><td class="v">host_AFTRouteViaExtractFSA</td><td class="s">fixo</td></tr>
+            <tr><td class="f">host_AFTRouteViaExtractFSA_LOG_DEFAULT</td><td class="v">YES</td><td class="s">fixo</td></tr>
+            <tr><td class="f">host_AFTRouteViaExtractFSA_PATH_EXTRACT_FSA</td><td class="v"><b>destinoNfs</b></td><td class="s">input#destinoNfs</td></tr>
+            <tr><td class="f">host_AFTRouteViaExtractFSA_IDFLOW</td><td class="v">ID-host-XXXX</td><td class="s">fixo</td></tr>
+            <tr><td class="f">host_AFTRouteViaExtractFSA_LISTA_EMAIL</td><td class="v">xpto@mail.com</td><td class="s">fixo</td></tr>
+            <tr><td class="f">host_AFTRouteViaExtractFSA_LOG_CUSTOM</td><td class="v">YES</td><td class="s">fixo</td></tr>
+            <tr><td class="f">host_AFTRouteViaExtractFSA_PATH_CUSTOM</td><td class="v">/NFS/LAB/SFG/FLUXOS/SIXPT/LogCustom</td><td class="s">fixo</td></tr>
+          </table>
+        </div></div>
+      </div>
+
+      <div class="section-title">Etapa 5 — POST /serviceinstances/ — FSA Produtor NFS</div>
+      <div class="steps">
+        <div class="step"><div class="sn nfs">5</div><div class="si">
+          <div class="stitle"><span>Criar FileSystem Adapter (FSA)</span><span class="bm bm-post">POST</span></div>
+          <div class="ep">POST /serviceinstances/</div>
+          <table class="p">
+            <tr><th>Campo</th><th>Valor</th><th>Origem</th></tr>
+            <tr><td class="f">serviceName</td><td class="v">"CEF_FSA_COLLECT_"+nomeProdutor</td><td class="s">derivado et.0</td></tr>
+            <tr><td class="f">serviceGroupName</td><td class="v">"CEF_GRP_FSA_"+nomeProdutor</td><td class="s">derivado et.0</td></tr>
+            <tr><td class="f">definitionName</td><td class="v">"FileSystem"</td><td class="s">fixo</td></tr>
+            <tr><td class="f">instParms → collectionFolder</td><td class="v">origemNfs</td><td class="s">input#origemNfs</td></tr>
+            <tr><td class="f">instParms → extractionFolder</td><td class="v">"/NFS/NULL"</td><td class="s">fixo</td></tr>
+            <tr><td class="f">instParms → userParm2</td><td class="v"><b>mailboxPath</b></td><td class="s">← GET etapa 4</td></tr>
+            <tr><td class="f">instParms → userParm3</td><td class="v">"NFS"</td><td class="s">fixo</td></tr>
+            <tr><td class="f">instParms → initialWorkFlowId</td><td class="v">"host_COLLECT_ARQ_FG-DEFAULT"</td><td class="s">fixo</td></tr>
+          </table>
+          <div class="ret"><strong>↩ mailboxPath (etapa 4)</strong> → <span class="rf">instParms.userParm2</span></div>
+        </div></div>
+      </div>
+
+      <div class="section-title">Etapa 7 — POST /schedules/ — Schedule NFS</div>
+      <div class="steps">
+        <div class="step"><div class="sn nfs">7</div><div class="si">
+          <div class="stitle"><span>Criar Schedule</span><span class="bm bm-post">POST</span></div>
+          <div class="ep">POST /schedules/</div>
+          <table class="p">
+            <tr><th>Campo / bpNameValuePairs</th><th>Valor</th><th>Origem</th></tr>
+            <tr><td class="f">businessProcess</td><td class="v">bpName = "CEF_FSA_COLLECT_"+nomeProdutor</td><td class="s">← etapa 6</td></tr>
+            <tr><td class="f">timerSchedule.minutes</td><td class="v">agendamento</td><td class="s">input#agendamento</td></tr>
+            <tr><td class="f">MBX_Produtor</td><td class="v"><b>mailboxPath</b></td><td class="s">← GET etapa 4</td></tr>
+            <tr><td class="f">maxCollect</td><td class="v">"10"</td><td class="s">fixo</td></tr>
+            <tr><td class="f">collectMultiple</td><td class="v">"true"</td><td class="s">fixo</td></tr>
+            <tr><td class="f">noFilesSetSuccess</td><td class="v">"true"</td><td class="s">fixo</td></tr>
+            <tr><td class="f">runAsUser</td><td class="v">"admin"</td><td class="s">fixo</td></tr>
+          </table>
+          <div class="ret"><strong>↩ mailboxPath (etapa 4)</strong> → <span class="rf">MBX_Produtor</span></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ BROWSER ═══════════════ -->
+  <div class="tab-pane" id="tab-browser">
+    <div class="legend"><div class="leg"><div class="dot" style="background:#db2777"></div>Fluxo BROWSER — Consumidor</div></div>
+    <div class="section">
+      <div class="section-title">Etapa 2 — POST /tradingpartners/ — Consumidor BROWSER</div>
+      <div class="steps">
+        <div class="step"><div class="sn browser">2</div><div class="si">
+          <div class="stitle"><span>Criar Trading Partner Consumidor BROWSER</span><span class="bm bm-post">POST</span><span class="bm bm-browser">BROWSER</span></div>
+          <div class="ep">POST /tradingpartners/</div>
+          <table class="p">
+            <tr><th>Campo</th><th>Valor BROWSER</th><th>Origem</th></tr>
+            <tr><td class="f">partnerName / username</td><td class="v">nomeConsumidor</td><td class="s">etapa 0</td></tr>
+            <tr><td class="f">isInitiatingConsumer</td><td class="v"><b>true</b> ← diferente dos outros!</td><td class="s">fixo BROWSER</td></tr>
+            <tr><td class="f">isListeningConsumer</td><td class="v"><b>false</b></td><td class="s">fixo BROWSER</td></tr>
+            <tr><td class="f">isInitiatingProducer</td><td class="v">false</td><td class="s">fixo</td></tr>
+            <tr><td class="f">isListeningProducer</td><td class="v">false</td><td class="s">fixo</td></tr>
+            <tr><td class="f">customProtocolName</td><td class="v"><b>removido (delete)</b></td><td class="s">BROWSER não usa protocolo customizado</td></tr>
+            <tr><td class="f">customProtocolExtensions</td><td class="v"><b>removido (delete)</b></td><td class="s">BROWSER não usa</td></tr>
+            <tr><td class="f">community</td><td class="v">"host_COMUNIDADE01"</td><td class="s">fixo</td></tr>
+            <tr><td class="f">password</td><td class="v">"123456"</td><td class="s">fixo</td></tr>
+          </table>
+          <div class="note"><strong>⚠️</strong> BROWSER é o único tipo em que o consumidor <b>inicia</b> a conexão — o cliente puxa os arquivos acessando o portal. Por isso <code>isInitiatingConsumer = true</code> e os campos de protocolo customizado são <b>deletados</b> do payload.</div>
+        </div></div>
+      </div>
+
+      <div class="section-title">Etapa 3 — POST /routingchannels/ — Canal BROWSER</div>
+      <div class="steps">
+        <div class="step"><div class="sn browser">3</div><div class="si">
+          <div class="stitle"><span>Criar Canal de Roteamento BROWSER</span><span class="bm bm-post">POST</span></div>
+          <div class="ep">POST /routingchannels/</div>
+          <table class="p">
+            <tr><th>Campo</th><th>Valor</th><th>Origem</th></tr>
+            <tr><td class="f">producer</td><td class="v">nomeProdutor</td><td class="s">etapa 0</td></tr>
+            <tr><td class="f">consumer</td><td class="v">nomeConsumidor</td><td class="s">etapa 0</td></tr>
+            <tr><td class="f">templateName</td><td class="v">T_SIMPLES_INFRA_PROTOCOLO</td><td class="s">etapa 0</td></tr>
+            <tr><td class="f">provisioningFacts[0] → myProdutorProtocolo</td><td class="v">tipoProduto (ex: "NFS")</td><td class="s">aba selecionada Produtor</td></tr>
+            <tr><td class="f">provisioningFacts[1] → myConsumidorProtocolo</td><td class="v">"BROWSER"</td><td class="s">aba selecionada Consumidor</td></tr>
+          </table>
+        </div></div>
+      </div>
+
+      <div class="section-title">Etapas 5, 6, 7 — idênticas ao fluxo NFS (lado Produtor)</div>
+      <div class="steps">
+        <div class="step"><div class="sn browser">5→7</div><div class="si">
+          <div class="stitle"><span>FSA + Business Process + Schedule</span><span class="bm bm-browser">BROWSER</span></div>
+          <p>Quando o Consumidor é BROWSER, <b>não há etapas extras do lado do consumidor</b>.<br>O consumidor acessa os arquivos via portal: <code>https://webfgw.host.gov.br/myfg/login</code><br>As etapas 5 (FSA), 6 (BP) e 7 (Schedule) são executadas <b>apenas para o Produtor</b>, seguindo o mesmo fluxo NFS.</p>
+          <div class="ret">
+            <strong>↩ mailboxPath (etapa 4)</strong> continua sendo usado em:<br>
+            • FSA → <span class="rf">instParms.userParm2</span><br>
+            • Schedule → <span class="rf">bpNameValuePairs.MBX_Produtor</span>
+          </div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ AZURE CONSUMIDOR ═══════════════ -->
+  <div class="tab-pane" id="tab-azure">
+    <div class="legend"><div class="leg"><div class="dot" style="background:#ea580c"></div>Fluxo AZURE — Consumidor — 4 chamadas extras</div></div>
+    <div class="section">
+      <div class="section-title">Etapa 2 — POST /tradingpartners/ — Consumidor AZURE</div>
+      <div class="steps">
+        <div class="step"><div class="sn azure">2</div><div class="si">
+          <div class="stitle"><span>Criar Trading Partner Consumidor AZURE</span><span class="bm bm-post">POST</span><span class="bm bm-azure">AZURE</span></div>
+          <div class="ep">POST /tradingpartners/</div>
+          <table class="p">
+            <tr><th>Campo</th><th>Valor</th><th>Origem</th></tr>
+            <tr><td class="f">customProtocolName</td><td class="v">"host-azure-protocol"</td><td class="s">fixo</td></tr>
+            <tr><td class="f">Objectstorebucketname</td><td class="v">azureBucket</td><td class="s">input#azureBucket</td></tr>
+            <tr><td class="f">Objectstorediretorioentrada</td><td class="v">azureBucketPastaDestino</td><td class="s">input#azureBucketPasta</td></tr>
+            <tr><td class="f">PROTOCOLBPNAME</td><td class="v">host_FG_Route_Azure</td><td class="s">fixo</td></tr>
+            <tr><td class="f">Objectstoreobscurename</td><td class="v">azureServicoObscure = "CEF_Azure_Obscure_"+nomeConsumidor</td><td class="s">derivado local</td></tr>
+            <tr><td class="f">Objectstoreclientadapter</td><td class="v">azureServicoGroup = "CEF_"+azureHost+"_"+nomeConsumidor+"_GRP"</td><td class="s">derivado local</td></tr>
+          </table>
+        </div></div>
+      </div>
+
+      <div class="section-title">Etapa 2b → POST /cadigitalcertificates/</div>
+      <div class="steps">
+        <div class="step"><div class="sn azure">2b</div><div class="si">
+          <div class="stitle"><span>Certificado CA Azure (Consumidor)</span><span class="bm bm-post">POST</span></div>
+          <div class="ep">POST /cadigitalcertificates/</div>
+          <table class="p">
+            <tr><th>Campo</th><th>Valor</th><th>Origem</th></tr>
+            <tr><td class="f">certName</td><td class="v">nomeConsumidor+"_"+azureHostTratado</td><td class="s">derivado local</td></tr>
+            <tr><td class="f">certData</td><td class="v">Base64 do arquivo .cer/.crt</td><td class="s">input#azureCACertificate → FileReader</td></tr>
+            <tr><td class="f">verifyAuthChain / verifyValidity</td><td class="v">false</td><td class="s">fixo</td></tr>
+          </table>
+          <div class="ret"><strong>↩ certNameParam</strong> = nomeConsumidor+"_"+azureHostTratado → etapa 2d campo <span class="rf">instParms.CACertList.1</span></div>
+        </div></div>
+      </div>
+
+      <div class="section-title">Etapa 2c → POST /serviceinstances/ (ObscureParameter)</div>
+      <div class="steps">
+        <div class="step"><div class="sn azure">2c</div><div class="si">
+          <div class="stitle"><span>Obscure Parameter — SecretKey Azure (Consumidor)</span><span class="bm bm-post">POST</span></div>
+          <div class="ep">POST /serviceinstances/</div>
+          <table class="p">
+            <tr><th>Campo</th><th>Valor</th><th>Origem</th></tr>
+            <tr><td class="f">definitionName</td><td class="v">"ObscureParameter"</td><td class="s">fixo</td></tr>
+            <tr><td class="f">serviceName</td><td class="v">azureServicoObscure</td><td class="s">derivado local</td></tr>
+            <tr><td class="f">instParms → obscureVal0</td><td class="v">azureSecretKey</td><td class="s">input#azureSecretKey</td></tr>
+            <tr><td class="f">instParms → obscureName0</td><td class="v">"secretkey"</td><td class="s">fixo</td></tr>
+          </table>
+        </div></div>
+      </div>
+
+      <div class="section-title">Etapa 2d → POST /serviceinstances/ (ObjectStoreClientAdapter)</div>
+      <div class="steps">
+        <div class="step"><div class="sn azure">2d</div><div class="si">
+          <div class="stitle"><span>ObjectStore Client Adapter Azure (Consumidor)</span><span class="bm bm-post">POST</span></div>
+          <div class="ep">POST /serviceinstances/</div>
+          <table class="p">
+            <tr><th>Campo</th><th>Valor</th><th>Origem</th></tr>
+            <tr><td class="f">definitionName</td><td class="v">"ObjectStoreClientAdapter"</td><td class="s">fixo</td></tr>
+            <tr><td class="f">serviceName</td><td class="v">"CEF_Azure_"+azureHostTratado+"_"+nomeConsumidor</td><td class="s">derivado</td></tr>
+            <tr><td class="f">serviceGroupName</td><td class="v">azureServicoGroup</td><td class="s">derivado local</td></tr>
+            <tr><td class="f">instParms → Endpoint</td><td class="v">azureURL</td><td class="s">input#azureURL</td></tr>
+            <tr><td class="f">instParms → BucketName</td><td class="v">azureBucket</td><td class="s">input#azureBucket</td></tr>
+            <tr><td class="f">instParms → CACertList.1</td><td class="v"><b>certNameParam</b></td><td class="s">← saída etapa 2b</td></tr>
+            <tr><td class="f">instParms → ObjectStoreType</td><td class="v">"azure"</td><td class="s">fixo</td></tr>
+            <tr><td class="f">instParms → ProxyHost</td><td class="v">"proxydes.host"</td><td class="s">fixo</td></tr>
+            <tr><td class="f">instParms → TimeOut / ReadTimeOut</td><td class="v">30000</td><td class="s">fixo</td></tr>
+          </table>
+          <div class="ret"><strong>↩ certNameParam (etapa 2b)</strong> → <span class="rf">instParms.CACertList.1</span></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ PRODUTOR AZURE ═══════════════ -->
+  <div class="tab-pane" id="tab-prod-azure">
+    <div class="legend"><div class="leg"><div class="dot" style="background:#ea580c"></div>Fluxo Produtor AZURE — etapas após o canal (etapa 3)</div></div>
+    <div class="section">
+      <div class="section-title">Etapas 5b-1/2/3 e Coletor Azure</div>
+      <div class="steps">
+        <div class="step"><div class="sn azure">5b-1</div><div class="si">
+          <div class="stitle"><span>Certificado CA Azure (Produtor)</span><span class="bm bm-post">POST</span></div>
+          <div class="ep">POST /cadigitalcertificates/</div>
+          <table class="p">
+            <tr><th>Campo</th><th>Valor</th><th>Origem</th></tr>
+            <tr><td class="f">certName</td><td class="v">nomeProdutor+"_"+azureHostTratado</td><td class="s">derivado local</td></tr>
+            <tr><td class="f">certData</td><td class="v">Base64 arquivo .cer/.crt</td><td class="s">input#prod-azureCACertificate</td></tr>
+          </table>
+          <div class="ret"><strong>↩ certNameParam</strong> → etapa 5b-3 campo <span class="rf">instParms.CACertList.1</span></div>
+        </div></div>
+        <div class="step"><div class="sn azure">5b-2</div><div class="si">
+          <div class="stitle"><span>Obscure Parameter — SecretKey Azure (Produtor)</span><span class="bm bm-post">POST</span></div>
+          <div class="ep">POST /serviceinstances/</div>
+          <table class="p">
+            <tr><th>Campo</th><th>Valor</th><th>Origem</th></tr>
+            <tr><td class="f">serviceName</td><td class="v">"CEF_Azure_Obscure_"+nomeProdutor</td><td class="s">derivado</td></tr>
+            <tr><td class="f">instParms → obscureVal0</td><td class="v">azureSecretKey</td><td class="s">input#prod-azureSecretKey</td></tr>
+          </table>
+        </div></div>
+        <div class="step"><div class="sn azure">5b-3</div><div class="si">
+          <div class="stitle"><span>ObjectStore Client Adapter Azure (Produtor)</span><span class="bm bm-post">POST</span></div>
+          <div class="ep">POST /serviceinstances/</div>
+          <table class="p">
+            <tr><th>Campo</th><th>Valor</th><th>Origem</th></tr>
+            <tr><td class="f">instParms → CACertList.1</td><td class="v"><b>certNameParam</b></td><td class="s">← saída etapa 5b-1</td></tr>
+            <tr><td class="f">instParms → Endpoint</td><td class="v">prod-azureURL</td><td class="s">input#prod-azureURL</td></tr>
+            <tr><td class="f">instParms → BucketName</td><td class="v">prod-azureBucket</td><td class="s">input#prod-azureBucket</td></tr>
+          </table>
+        </div></div>
+        <div class="step"><div class="sn get">5b-4</div><div class="si">
+          <div class="stitle"><span>Buscar Mailbox Path do Produtor Azure</span><span class="bm bm-get">GET</span></div>
+          <div class="ep get">GET /routingchannels/?searchByProducer=…&searchByConsumer=…</div>
+          <div class="ret"><strong>↩ mailboxPathProdutor</strong> = response[0].producerMailboxPath → Schedule etapa 7 campo <span class="rf">b2b_mbx_produtor</span></div>
+        </div></div>
+        <div class="step"><div class="sn azure">6</div><div class="si">
+          <div class="stitle"><span>Criar BP Coletor Azure</span><span class="bm bm-post">POST</span></div>
+          <div class="ep">POST /workflows/</div>
+          <table class="p">
+            <tr><th>Campo</th><th>Valor</th><th>Origem</th></tr>
+            <tr><td class="f">name (bpName)</td><td class="v">"CEF_ColetorAzure_"+nomeProdutor</td><td class="s">derivado</td></tr>
+            <tr><td class="f">businessProcess XML</td><td class="v">Invoca host_FG_Route_Azure_ColetarArquivos via InvokeBusinessProcessService</td><td class="s">fixo</td></tr>
+          </table>
+        </div></div>
+        <div class="step"><div class="sn azure">7</div><div class="si">
+          <div class="stitle"><span>Criar Schedule Coletor Azure</span><span class="bm bm-post">POST</span></div>
+          <div class="ep">POST /schedules/</div>
+          <table class="p">
+            <tr><th>bpNameValuePairs</th><th>Valor</th><th>Origem</th></tr>
+            <tr><td class="f">azure_servico_grupo</td><td class="v">azureServicoGroup</td><td class="s">derivado local</td></tr>
+            <tr><td class="f">azure_servico_obscure</td><td class="v">azureServicoObscure</td><td class="s">derivado local</td></tr>
+            <tr><td class="f">azure_dir_origem</td><td class="v">prod_azure_pastaorigem</td><td class="s">input#prod-azure-pastaorigem</td></tr>
+            <tr><td class="f">azure_dir_consumido</td><td class="v">prod_azure_pastaarquivado</td><td class="s">input#prod-azure-pastaarquivado</td></tr>
+            <tr><td class="f">b2b_mbx_produtor</td><td class="v"><b>mailboxPathProdutor</b></td><td class="s">← GET etapa 5b-4</td></tr>
+            <tr><td class="f">azure_filtro</td><td class="v">".+"</td><td class="s">fixo</td></tr>
+            <tr><td class="f">timerSchedule.minutes</td><td class="v">agendamentoParam</td><td class="s">input#prod-azure-agendamento</td></tr>
+          </table>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ ENCADEAMENTO ═══════════════ -->
+  <div class="tab-pane" id="tab-chain">
+    <div class="legend"><div class="leg"><div class="dot" style="background:#16a34a"></div>Saída de uma etapa alimenta a próxima chamada</div></div>
+    <div class="section">
+      <div class="section-title">Retornos encadeados entre APIs</div>
+      <div class="chain-box">
+        <div class="chain-row"><div class="chain-from">etapa 0 (local)</div><div class="chain-arrow">→</div><div class="chain-to"><b>nomeProdutor</b> e <b>nomeConsumidor</b> — usados em <b>todas</b> as etapas como partnerName, serviceName, bpName, certName…</div></div>
+        <div class="chain-row"><div class="chain-from">GET etapa 4</div><div class="chain-arrow">→</div><div class="chain-to"><b>producerMailboxPath</b> → FSA et.5 campo <b>instParms.userParm2</b> · Schedule et.7 campo <b>MBX_Produtor</b> (NFS/BROWSER)</div></div>
+        <div class="chain-row"><div class="chain-from">POST et.2b (AZURE cons)</div><div class="chain-arrow">→</div><div class="chain-to"><b>certNameParam</b> = nomeConsumidor+"_"+azureHostTratado → ObjectStore et.2d campo <b>instParms.CACertList.1</b></div></div>
+        <div class="chain-row"><div class="chain-from">local AZURE cons</div><div class="chain-arrow">→</div><div class="chain-to"><b>azureServicoGroup</b> → customProtocolExtensions et.2 (Objectstoreclientadapter) · Schedule et.7 (azure_servico_grupo)</div></div>
+        <div class="chain-row"><div class="chain-from">local AZURE cons</div><div class="chain-arrow">→</div><div class="chain-to"><b>azureServicoObscure</b> → customProtocolExtensions et.2 (Objectstoreobscurename) · Schedule et.7 (azure_servico_obscure)</div></div>
+        <div class="chain-row"><div class="chain-from">POST et.5b-1 (AZURE prod)</div><div class="chain-arrow">→</div><div class="chain-to"><b>certNameParam</b> = nomeProdutor+"_"+azureHostTratado → ObjectStore et.5b-3 campo <b>instParms.CACertList.1</b></div></div>
+        <div class="chain-row"><div class="chain-from">GET et.5b-4 (AZURE prod)</div><div class="chain-arrow">→</div><div class="chain-to"><b>mailboxPathProdutor</b> → Schedule et.7 campo <b>b2b_mbx_produtor</b></div></div>
+        <div class="chain-row"><div class="chain-from">POST etapa 6</div><div class="chain-arrow">→</div><div class="chain-to"><b>bpName</b> (nome do BP criado) → Schedule et.7 campo <b>businessProcess</b></div></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /body -->
+
+<footer>Powered by <span>IBM BOB</span> &nbsp;·&nbsp; <a href="index.html" style="color:#005CA9;text-decoration:none;">← Voltar ao Portal</a></footer>
+
+<script>
+function showTab(id) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+</script>
+</body>
+</html>
