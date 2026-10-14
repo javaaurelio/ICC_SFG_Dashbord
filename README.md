@@ -2,6 +2,19 @@
 ICC_SFG_Dashbord
 
 
+
+Link Mapa - Descricao
+
+
+https://github.com/javaaurelio/ICC_SFG_Dashbord/blob/main/Mapa/mapa-mental-criarintegracao-apis-sfg.html
+
+https://github.com/javaaurelio/ICC_SFG_Dashbord/blob/main/Mapa/mapa-mental-criarintegracao-apis-sfg.html
+
+
+
+
+
+================================================
 SFG
 
 <img width="3132" height="1562" alt="image" src="https://github.com/user-attachments/assets/c7ab79df-3982-4d4a-b0ee-66a253d2c111" />
